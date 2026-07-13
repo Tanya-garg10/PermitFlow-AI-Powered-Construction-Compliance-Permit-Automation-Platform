@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Regulation } from '../types';
 import { Trash2, BarChart3, Users, Settings, PlusCircle } from 'lucide-react';
+import { translateText } from '../i18n';
 
 interface AdminPanelProps {
   regulations: Regulation[];
+  selectedLang: string;
   onAddRegulation: (r: any) => void;
   onDeleteRegulation: (id: string) => void;
 }
@@ -15,7 +17,8 @@ export interface AdminUser {
   role: string;
 }
 
-export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegulation }: AdminPanelProps) {
+export default function AdminPanel({ regulations, selectedLang, onAddRegulation, onDeleteRegulation }: AdminPanelProps) {
+  const t = (text: string) => translateText(text, selectedLang);
   const [activeTab, setActiveTab] = useState<'analytics' | 'rules' | 'users'>('analytics');
   
   // Regulation Add Form States
@@ -85,7 +88,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
           }`}
         >
           <BarChart3 className="w-3.5 h-3.5 inline mr-1.5" />
-          System Analytics
+          {t('System Analytics')}
         </button>
         <button
           id="admin-tab-rules"
@@ -95,7 +98,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
           }`}
         >
           <Settings className="w-3.5 h-3.5 inline mr-1.5" />
-          Regulations Manager
+          {t('Regulations Manager')}
         </button>
         <button
           id="admin-tab-users"
@@ -105,7 +108,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
           }`}
         >
           <Users className="w-3.5 h-3.5 inline mr-1.5" />
-          User Directory
+          {t('User Directory')}
         </button>
       </div>
 
@@ -114,13 +117,13 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
       {activeTab === 'analytics' && (
         <div id="admin-analytics-view" className="space-y-6">
           {loadingAnalytics ? (
-            <p className="text-xs text-slate-400 text-center py-12 italic">Compiling municipal statistics databases...</p>
+            <p className="text-xs text-slate-400 text-center py-12 italic">{t('Compiling municipal statistics databases...')}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Chart 1: Permit status breakout (Draft, Submitted, Approved, Rejected) */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Permit Status Allocation</span>
+                <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Permit Status Allocation')}</span>
                 <div className="space-y-4 text-xs font-sans">
                   {analyticsData?.permitStatusCounts.map((stat: any, idx: number) => {
                     const total = analyticsData.permitStatusCounts.reduce((acc: number, c: any) => acc + c.value, 0) || 1;
@@ -151,7 +154,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
 
               {/* Chart 2: Violation counts */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Zoning Violation categories</span>
+                <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Zoning Violation categories')}</span>
                 <div className="space-y-3.5 text-xs">
                   {analyticsData?.violationTypes.map((v: any, idx: number) => {
                     const maxCount = Math.max(...analyticsData.violationTypes.map((i: any) => i.count)) || 1;
@@ -175,7 +178,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
 
               {/* Chart 3: Average approval days */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Average Clearance Turnaround (Days)</span>
+                <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Average Clearance Turnaround (Days)')}</span>
                 <div className="space-y-4 text-xs">
                   {analyticsData?.averageApprovalTime.map((item: any, idx: number) => {
                     const maxDays = Math.max(...analyticsData.averageApprovalTime.map((i: any) => i.days)) || 1;
@@ -202,7 +205,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
               {/* Chart 4: Historical Approval success rate */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
                 <div>
-                  <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Clearing rate Progression</span>
+                  <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Clearing rate Progression')}</span>
                   <div className="flex items-end justify-between h-28 pt-4 border-b border-slate-200 border-l border-slate-200 px-4 font-mono text-[9px] text-slate-400">
                     {analyticsData?.approvalRateHistory.map((item: any, idx: number) => {
                       const hPercent = item.rate;
@@ -233,7 +236,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
           
           {/* List of active regulations rules */}
           <div className="md:col-span-2 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-            <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Active Building Standards ({regulations.length})</span>
+            <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Active Building Standards')} ({regulations.length})</span>
             
             <div className="overflow-x-auto text-xs text-slate-700">
               <table className="w-full text-left border-collapse">
@@ -281,11 +284,11 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
           {/* Form to add a new regulation */}
           <div className="md:col-span-1 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between h-fit space-y-4 shadow-sm text-slate-800">
             <div>
-              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Add Zoning Standard</span>
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Add Zoning Standard')}</span>
               
               <form onSubmit={handleCreateRegulation} className="space-y-3.5 text-xs text-slate-700">
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Standard Name</label>
+                  <label className="block text-slate-500 font-bold mb-1">{t('Standard Name')}</label>
                   <input
                     id="reg-name-input"
                     type="text"
@@ -298,7 +301,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
                 </div>
 
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Standard Description</label>
+                  <label className="block text-slate-500 font-bold mb-1">{t('Standard Description')}</label>
                   <input
                     id="reg-desc-input"
                     type="text"
@@ -311,7 +314,7 @@ export default function AdminPanel({ regulations, onAddRegulation, onDeleteRegul
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Category Code</label>
+                    <label className="block text-slate-500 font-bold mb-1">{t('Category Code')}</label>
                     <select
                       id="reg-cat-select"
                       value={regCategory}

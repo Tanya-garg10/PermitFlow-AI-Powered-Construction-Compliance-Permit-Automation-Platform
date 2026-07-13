@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Project } from '../types';
+import { translateText } from '../i18n';
 import { LayoutGrid, CheckCircle2, Clock, XOctagon, Sparkles, ArrowUpRight, Plus, MapPin, FileText } from 'lucide-react';
 import GisPlotValidator from './GisPlotValidator';
 import RegulationRAG from './RegulationRAG';
 
 interface DashboardCardsProps {
   projects: Project[];
+  selectedLang: string;
   onProjectClick: (p: Project) => void;
   onNewProjectClick: () => void;
 }
 
-export default function DashboardCards({ projects, onProjectClick, onNewProjectClick }: DashboardCardsProps) {
+export default function DashboardCards({ projects, selectedLang, onProjectClick, onNewProjectClick }: DashboardCardsProps) {
+  const t = (text: string) => translateText(text, selectedLang);
   const total = projects.length;
   const pending = projects.filter(p => p.status === 'Submitted' || p.status === 'Under Review' || p.status === 'Document Verification').length;
   const approved = projects.filter(p => p.status === 'Approved' || p.status === 'Completed').length;
@@ -21,11 +24,11 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
     : 100;
 
   const statCards = [
-    { title: "Total Projects", value: total, icon: <LayoutGrid className="w-5 h-5 text-blue-600" />, bg: "bg-blue-50/70 border-blue-100" },
-    { title: "Pending Permits", value: pending, icon: <Clock className="w-5 h-5 text-amber-600" />, bg: "bg-amber-50/70 border-amber-100" },
-    { title: "Approved Permits", value: approved, icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />, bg: "bg-emerald-50/70 border-emerald-100" },
-    { title: "Rejected Permits", value: rejected, icon: <XOctagon className="w-5 h-5 text-rose-600" />, bg: "bg-rose-50/70 border-rose-100" },
-    { title: "Avg Compliance", value: `${avgScore}%`, icon: <Sparkles className="w-5 h-5 text-purple-600" />, bg: "bg-purple-50/70 border-purple-100" }
+    { title: t('Total Projects'), value: total, icon: <LayoutGrid className="w-5 h-5 text-blue-600" />, bg: "bg-blue-50/70 border-blue-100" },
+    { title: t('Pending Permits'), value: pending, icon: <Clock className="w-5 h-5 text-amber-600" />, bg: "bg-amber-50/70 border-amber-100" },
+    { title: t('Approved Permits'), value: approved, icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />, bg: "bg-emerald-50/70 border-emerald-100" },
+    { title: t('Rejected Permits'), value: rejected, icon: <XOctagon className="w-5 h-5 text-rose-600" />, bg: "bg-rose-50/70 border-rose-100" },
+    { title: t('Avg Compliance'), value: `${avgScore}%`, icon: <Sparkles className="w-5 h-5 text-purple-600" />, bg: "bg-purple-50/70 border-purple-100" }
   ];
 
   const [activeTab, setActiveTab] = useState<'portfolios' | 'gis' | 'rag'>('portfolios');
@@ -36,8 +39,8 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
       {/* Dashboard Top Header Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Compliance Console</h1>
-          <p className="text-xs text-slate-500 mt-1">Manage real-time municipal audits, track approval progress, and review automated regulations checkups.</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">{t('Compliance Console')}</h1>
+          <p className="text-xs text-slate-500 mt-1">{t('Manage real-time municipal audits, track approval progress, and review automated regulations checkups.')}</p>
         </div>
 
         <button
@@ -46,7 +49,7 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
           className="flex items-center space-x-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-semibold text-white shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-150 shrink-0 self-end sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>New Project Wizard</span>
+          <span>{t('New Project Wizard')}</span>
         </button>
       </div>
 
@@ -77,7 +80,7 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
           }`}
         >
           <LayoutGrid className="w-4 h-4" />
-          <span>My Active Portfolios</span>
+          <span>{t('My Active Portfolios')}</span>
         </button>
         <button
           onClick={() => setActiveTab('gis')}
@@ -88,7 +91,7 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
           }`}
         >
           <MapPin className="w-4 h-4" />
-          <span>Smart City GIS Map</span>
+          <span>{t('Smart City GIS Map')}</span>
         </button>
         <button
           onClick={() => setActiveTab('rag')}
@@ -99,7 +102,7 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Regulation Search (RAG)</span>
+          <span>{t('Regulation Search (RAG)')}</span>
         </button>
       </div>
 
@@ -113,20 +116,20 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
           {/* Project Table Grid */}
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">Active Project Portfolios</span>
-              <span className="text-[10px] text-slate-500 font-bold">{projects.length} Portfolios Found</span>
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">{t('Active Project Portfolios')}</span>
+              <span className="text-[10px] text-slate-500 font-bold">{projects.length} {t('Portfolios Found')}</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-wider bg-slate-50/30">
-                    <th className="py-3 px-4">Project Name & Location</th>
-                    <th className="py-3 px-4">Building Specs</th>
-                    <th className="py-3 px-4">Zoning Audit</th>
-                    <th className="py-3 px-4">Risk Rating</th>
-                    <th className="py-3 px-4">Tracker Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <th className="py-3 px-4">{t('Project Name & Location')}</th>
+                    <th className="py-3 px-4">{t('Building Specs')}</th>
+                    <th className="py-3 px-4">{t('Zoning Audit')}</th>
+                    <th className="py-3 px-4">{t('Risk Rating')}</th>
+                    <th className="py-3 px-4">{t('Tracker Status')}</th>
+                    <th className="py-3 px-4 text-right">{t('Actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -212,7 +215,7 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
             
             {/* Recent Activity Log */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">Verification Audit Log</span>
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('Verification Audit Log')}</span>
               <div className="space-y-4">
                 <div className="flex gap-3 text-xs">
                   <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
@@ -247,14 +250,14 @@ export default function DashboardCards({ projects, onProjectClick, onNewProjectC
               <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none" />
               <div>
                 <h3 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-blue-600" /> Auto-filled Government Forms
+                  <FileText className="w-4 h-4 text-blue-600" /> {t('Auto-filled Government Forms')}
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed mb-4">
                   All compliance checkups automatically sync structural statistics directly to your local government municipal application documents. Click any portfolio row to download a pre-compiled draft of the regulatory form.
                 </p>
               </div>
               <div className="p-3 bg-white border border-blue-100 rounded-xl text-[11px] text-slate-600 shadow-sm">
-                <span className="font-mono font-bold text-blue-600">Zoning Tip:</span> Ensure setbacks have at least 15% green landscaped boundaries to clear environmental checklist ratings instantly.
+                <span className="font-mono font-bold text-blue-600">{t('Zoning Tip:')}</span> Ensure setbacks have at least 15% green landscaped boundaries to clear environmental checklist ratings instantly.
               </div>
             </div>
           </div>

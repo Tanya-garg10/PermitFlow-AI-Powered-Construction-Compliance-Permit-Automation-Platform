@@ -801,11 +801,208 @@ app.post("/api/document-intelligence", async (req, res) => {
   }
 });
 
+const normalizeLanguage = (language?: string) => {
+  const raw = (language || "English").trim();
+  const aliases: Record<string, string> = {
+    "en": "English",
+    "english": "English",
+    "hi": "Hindi",
+    "hindi": "Hindi",
+    "हिंदी": "Hindi",
+    "ta": "Tamil",
+    "tamil": "Tamil",
+    "தமிழ்": "Tamil",
+    "gu": "Gujarati",
+    "gujarati": "Gujarati",
+    "ગુજરાતી": "Gujarati",
+    "mr": "Marathi",
+    "marathi": "Marathi",
+    "मराठी": "Marathi",
+    "pa": "Punjabi",
+    "punjabi": "Punjabi",
+    "ਪੰਜਾਬੀ": "Punjabi",
+    "kn": "Kannada",
+    "kannada": "Kannada",
+    "ಕನ್ನಡ": "Kannada",
+    "ml": "Malayalam",
+    "malayalam": "Malayalam",
+    "മലയാളം": "Malayalam",
+    "te": "Telugu",
+    "telugu": "Telugu",
+    "తెలుగు": "Telugu",
+    "bn": "Bengali",
+    "bengali": "Bengali",
+    "বাংলা": "Bengali",
+    "or": "Odia",
+    "odia": "Odia",
+    "ଓଡ଼ିଆ": "Odia",
+    "as": "Assamese",
+    "assamese": "Assamese",
+    "অসমীয়া": "Assamese"
+  };
+
+  return aliases[raw.toLowerCase()] || raw;
+};
+
+const getLocalizedChatFallback = (userMessage: string, projectContext: any, selectedLang: string) => {
+  const language = normalizeLanguage(selectedLang);
+  const lowerMessage = userMessage.toLowerCase();
+  const projectName = projectContext?.name || "New Project";
+  const location = projectContext?.location || "Smart City";
+  const buildingType = projectContext?.buildingType || "Residential";
+  const maxHeight = buildingType === "Commercial" ? "50" : "15";
+
+  if (lowerMessage.includes("fire noc") || lowerMessage.includes("fire safety")) {
+    if (language === "Hindi") {
+      return "હા, તમને Fire NOC જોઈએ! આ મ્યુનિસિપાલિટીમાં કોઈ પણ ઈમારત જે 15 મીટરથી વધુ ઊંચી હોય અથવા 3 માળથી વધુ હોય માટે ચીફ ફાયર અધિકારી NOC ફરજિયાત છે. તમારી યોજનાઓમાં ડ્યુઅલ ફાયર એકઝિટ, ઇમરજન્સી അലાર્મ અને એક્ટિવ વેટ-રાઈઝર પાઈપ સિસ્ટમ દર્શાવવી આવશ્યક છે.";
+    }
+    if (language === "Tamil") {
+      return "ஆம், உங்களுக்கு Fire NOC தேவை! இந்த நகராட்சியில் 15 மீட்டருக்கு மேல் உயரம் அல்லது 3 மாடிகளுக்கு மேல் கொண்ட எந்த கட்டிடத்திற்கும் தலைமை தீயணைப்பு அதிகாரி NOC கட்டாயமாகும். உங்கள் திட்டங்களில் இரட்டை தீயணைப்பு வெளியேற்றங்கள், அவசர அலாரங்கள் மற்றும் செயலில் உள்ள வாட்டர் ரைசர் பைப் அமைப்புகள் காட்டப்பட வேண்டும்.";
+    }
+    if (language === "Gujarati") {
+      return "હા, તમને Fire NOC જોઈએ! આ नगरपालिका માટે 15 મીટરથી વધુની ઊંચાઈ અથવા 3 માળથી વધુની કોઈપણ ઇમારત માટે ચીફ ફાયર ઓફિસર NOC જરૂરી છે. તમારા પ્લાનમાં ડ્યુઅલ ફાયર একઝિટ, ઇમરજન્સી અ alarm અને oneવિવેર વોટર-રાઇઝર પાઈપ સિસ્ટમ દર્શાવવી આવશ્યક છે.";
+    }
+    return "Yes, you require a Fire NOC! In this municipality, a Chief Fire Officer NOC is mandatory for any building taller than 15 meters or over 3 floors in height. Your plans must show dual fire exits, emergency alarms, and active wet-riser pipe systems to receive fire board approval.";
+  }
+
+  if (lowerMessage.includes("setback") || lowerMessage.includes("boundary")) {
+    if (language === "Hindi") {
+      return "ज़ोनिंग नियमों के अनुसार, सैटबैक की न्यूनतम सीमा निवासीय क्षेत्रों में 3.0 मीटर और वाणिज्यिक/मिश्र-उपयोग वाली संपत्तियों में 5.0 मीटर होनी चाहिए। साइडलाइनों की सीमा निवासीय में 1.5 मीटर और वाणिज्यिक संरचनाओं में 3.0 मीटर होनी चाहिए। कृपया अपने वर्तमान ड्राइंग लेआउट की फिर से जाँच करें.";
+    }
+    if (language === "Tamil") {
+      return "மண்டல விதிகளின்படி, முன் பின்வாங்கல் குறைந்தபட்சம் குடியிருப்பு பகுதிகளில் 3.0 மீட்டர் மற்றும் வணிக/கலப்பு-பயன்பாட்டு சொத்துக்களில் 5.0 மீட்டர் ஆக இருக்க வேண்டும். பக்க எல்லை பின்வாங்கல் குடியிருப்பில் 1.5 மீட்டர் மற்றும் வணிக கட்டிடங்களில் 3.0 மீட்டர் ஆக இருக்க வேண்டும். உங்கள் தற்போதைய வரைவு தளவமைப்பை மீண்டும் சரிபார்க்கவும்.";
+    }
+    if (language === "Gujarati") {
+      return "ઝોનિંગ નિયમો મુજબ, Front setback નીλάχισימום 3.0 મીટર રેસિડન્શિયલ વિસ્તારો માટે અને 5.0 મીટર Commercial અથવા Mixed-Use પ્રોપર્ટી માટે હોય છે. સાઇડલાઇન setback રેસિડન્શિયલમાં 1.5 મીટર અને Commercial સ્ટ્રક્ચર્સમાં 3.0 મીટર હોવું જોઈએ. કૃપા કરીને તમારું વર્તમાન ડ્રોઈંગ લેઆઉટ ફરીથી ચેક કરો.";
+    }
+    return "Zoning rules state that the front setback must be a minimum of 3.0 meters for residential areas, and 5.0 meters for commercial or mixed-use properties. Sideline setback borders must be at least 1.5 meters for residential and 3.0 meters for commercial structures. Please double-check your current drawing layout.";
+  }
+
+  if (lowerMessage.includes("floor") || lowerMessage.includes("far")) {
+    if (language === "Hindi") {
+      return "आपकी अनुमत Floor Area Ratio (FAR) आपकी ज़ोनिंग श्रेणी पर निर्भर करती है। वाणिज्यिक क्षेत्रों में अधिकतम FAR 3.0, Residential क्षेत्रों में 2.5, और Mixed-Use क्षेत्रों में 2.8 है। इससे अधिक होने पर गंभीर उल्लंघन होगा और स्वचालित अस्वीकृति होगी.";
+    }
+    if (language === "Tamil") {
+      return "உங்கள் அனுமதிக்கப்பட்ட Floor Area Ratio (FAR) உங்கள் மண்டல வகையைப் பொறுத்தது. வணிகப் பகுதிகளில் அதிகபட்ச FAR 3.0, குடியிருப்பு பகுதிகளில் 2.5, மற்றும் கலப்பு-பயன்பாட்டு பகுதிகளில் 2.8 ஆகும். இவற்றை மீறும் போது கடுமையான மீறல் ஏற்பட்டு தானியங்கி நிராகரிப்பு ஏற்படும்.";
+    }
+    if (language === "Gujarati") {
+      return "તમારી પરવાનગી મળેલ Floor Area Ratio (FAR) તમારા ઝોનિંગ કેટેગરી પર નિર્ભર કરે છે. Commercial વિસ્તારોમાં વધુમાં વધુ FAR 3.0, Residential વિસ્તારોમાં 2.5, અને Mixed-Use વિસ્તારોમાં 2.8 છે. આથી વધુ થવા પર ગંભીર ઉલ્લંઘન થશે અને આપમેળે નામંજૂર થઈ શકે છે.";
+    }
+    return "Your permissible Floor Area Ratio (FAR) depends on your zoning category. Commercial sectors permit a maximum FAR of 3.0, Residential sectors permit 2.5, and Mixed-Use sectors permit 2.8. Exceeding this will cause a critical violation and trigger automatic rejection.";
+  }
+
+  if (language === "Hindi") {
+    return `मैंने आपकी पूछताछ प्राप्त कर ली है: "${userMessage}". इस परियोजना (${projectName} ${location} में) के लिए नगरपालिका नियमों के अनुसार ऊँचाई सीमा तक ${maxHeight}m और बैकसीट नियम लागू होते हैं। सुनिश्चित करें कि आपका डिज़ाइन इन ज़ोनिंग प्रतिबंधों के अनुरूप हो! आप किस विशेष नियम या सेक्शन का विश्लेषण करना चाहेंगे?`;
+  }
+  if (language === "Tamil") {
+    return `உங்கள் கேள்வியைப் பெற்றுள்ளேன்: "${userMessage}". இந்த திட்டத்திற்கு (${projectName} ${location} இல்) நகராட்சி விதிகளின்படி ${maxHeight}m வரை உயர வரம்பு மற்றும் பின்வாங்கல் விதிகள் பொருந்தும். உங்கள் வடிவமைப்பு இந்த மண்டல கட்டுப்பாடுகளுடன் ஒத்துப்போவதை உறுதிப்படுத்திக் கொள்ளுங்கள்! எந்த குறிப்பிட்ட விதி அல்லது பிரிவை நீங்கள் பகுப்பாய்வு செய்ய விரும்புகிறீர்கள்?`;
+  }
+  if (language === "Gujarati") {
+    return `હું તમારી પ્રશ્નને Grâceથી મળ્યો છે: "${userMessage}". આ પ્રોજેક્ટ (${projectName} ${location} માં) માટે નગરપાલિકા નિયમો મુજબ ઊંચાઈની મર્યાદા ${maxHeight}m સુધી અને setback નિયમો લાગુ છે. ખાતરી કરો કે તમારો ડિઝાઇન આ ઝોનિંગ ર stricctions સાથે બંધબેસે! તમે કયો વિશિષ્ટ નિયમ અથવા વિભાગ વિશ્લેષણ કરવા માંગો છો?`;
+  }
+  return `I have received your query: "${userMessage}". For this project (${projectName} in ${location}), municipal rules govern height limits of up to ${maxHeight}m and setbacks. Make sure your design aligns with these zoning restrictions! What specific rule or section would you like me to analyze next?`;
+};
+
+const getLocalizedChatFallbackV2 = (userMessage: string, projectContext: any, selectedLang: string) => {
+  const language = normalizeLanguage(selectedLang);
+  const lowerMessage = userMessage.toLowerCase();
+  const projectName = projectContext?.name || "New Project";
+  const location = projectContext?.location || "Smart City";
+  const buildingType = projectContext?.buildingType || "Residential";
+  const maxHeight = buildingType === "Commercial" ? "50" : "15";
+
+  const responses: Record<string, { fireNoc: string; setback: string; far: string; general: string }> = {
+    Hindi: {
+      fireNoc: "हाँ, आपको Fire NOC चाहिए! इस नगरपालिका में 15 मीटर से अधिक ऊँचाई या 3 मंजिल से अधिक किसी भी इमारत के लिए चीफ़ फायर ऑफिसर NOC अनिवार्य है। आपकी योजनाओं में डुअल फायर एग्जिट, इमरजेंसी अलार्म और एक्टिव वेट-राइज़र पाइप सिस्टम दिखाना आवश्यक है।",
+      setback: "ज़ोनिंग नियमों के अनुसार, सैटबैक की न्यूनतम सीमा निवासीय क्षेत्रों में 3.0 मीटर और वाणिज्यिक/मिश्र-उपयोग वाली संपत्तियों में 5.0 मीटर होनी चाहिए। साइडलाइनों की सीमा निवासीय में 1.5 मीटर और वाणिज्यिक संरचनाओं में 3.0 मीटर होनी चाहिए। कृपया अपने वर्तमान ड्राइंग लेआउट की फिर से जाँच करें।",
+      far: "आपकी अनुमत Floor Area Ratio (FAR) आपकी ज़ोनिंग श्रेणी पर निर्भर करती है। वाणिज्यिक क्षेत्रों में अधिकतम FAR 3.0, Residential क्षेत्रों में 2.5, और Mixed-Use क्षेत्रों में 2.8 है। इससे अधिक होने पर गंभीर उल्लंघन होगा और स्वचालित अस्वीकृति होगी।",
+      general: `मैंने आपकी पूछताछ प्राप्त कर ली है: "${userMessage}". इस परियोजना (${projectName} ${location} में) के लिए नगरपालिका नियमों के अनुसार ऊँचाई सीमा तक ${maxHeight}m और बैकसीट नियम लागू होते हैं। सुनिश्चित करें कि आपका डिज़ाइन इन ज़ोनिंग प्रतिबंधों के अनुरूप हो! आप किस विशेष नियम या सेक्शन का विश्लेषण करना चाहेंगे?`
+    },
+    Tamil: {
+      fireNoc: "ஆம், உங்களுக்கு Fire NOC தேவை! இந்த நகராட்சியில் 15 மீட்டருக்கு மேல் உயரம் அல்லது 3 மாடிகளுக்கு மேல் கொண்ட எந்த கட்டிடத்திற்கும் தலைமை தீயணைப்பு அதிகாரி NOC கட்டாயமாகும். உங்கள் திட்டங்களில் இரட்டை தீயணைப்பு வெளியேற்றங்கள், அவசர அலாரங்கள் மற்றும் செயலில் உள்ள வாட்டர் ரைசர் பைப் அமைப்புகள் காட்டப்பட வேண்டும்.",
+      setback: "மண்டல விதிகளின்படி, முன் பின்வாங்கல் குறைந்தபட்சம் குடியிருப்பு பகுதிகளில் 3.0 மீட்டர் மற்றும் வணிக/கலப்பு-பயன்பாட்டு சொத்துக்களில் 5.0 மீட்டர் ஆக இருக்க வேண்டும். பக்க எல்லை பின்வாங்கல் குடியிருப்பில் 1.5 மீட்டர் மற்றும் வணிக கட்டிடங்களில் 3.0 மீட்டர் ஆக இருக்க வேண்டும். உங்கள் தற்போதைய வரைவு தளவமைப்பை மீண்டும் சரிபார்க்கவும்.",
+      far: "உங்கள் அனுமதிக்கப்பட்ட Floor Area Ratio (FAR) உங்கள் மண்டல வகையைப் பொறுத்தது. வணிகப் பகுதிகளில் அதிகபட்ச FAR 3.0, குடியிருப்பு பகுதிகளில் 2.5, மற்றும் கலப்பு-பயன்பாட்டு பகுதிகளில் 2.8 ஆகும். இவற்றை மீறும் போது கடுமையான மீறல் ஏற்பட்டு தானியங்கி நிராகரிப்பு ஏற்படும்.",
+      general: `உங்கள் கேள்வியைப் பெற்றுள்ளேன்: "${userMessage}". இந்த திட்டத்திற்கு (${projectName} ${location} இல்) நகராட்சி விதிகளின்படி ${maxHeight}m வரை உயர வரம்பு மற்றும் பின்வாங்கல் விதிகள் பொருந்தும். உங்கள் வடிவமைப்பு இந்த மண்டல கட்டுப்பாடுகளுடன் ஒத்துப்போவதை உறுதிப்படுத்திக் கொள்ளுங்கள்! எந்த குறிப்பிட்ட விதி அல்லது பிரிவை நீங்கள் பகுப்பாய்வு செய்ய விரும்புகிறீர்கள்?`
+    },
+    Gujarati: {
+      fireNoc: "હા, તમને Fire NOC જોઈએ! આ नगरपालिका માટે 15 મીટરથી વધુની ઊંચાઈ અથવા 3 માળથી વધુની કોઈપણ ઇમારત માટે ચીફ ફાયર ઓફિસર NOC જરૂરી છે. તમારા પ્લાનમાં ડ્યુઅલ ફાયર એકઝિટ, ઇમરજન્સી અ alarm અને oneવિવેર વોટર-રાઈઝર પાઈપ સિસ્ટમ દર્શાવવી આવશ્યક છે.",
+      setback: "ઝોનિંગ નિયમો મુજબ, Front setback નીλάχισימום 3.0 મીટર રેસિડન્શિયલ વિસ્તારો માટે અને 5.0 મીટર Commercial અથવા Mixed-Use પ્રોપર્ટી માટે હોય છે. સાઇડલાઇન setback રેસિડન્શિયલમાં 1.5 મીટર અને Commercial સ્ટ્રક્ચર્સમાં 3.0 મીટર હોવું જોઈએ. કૃપા કરીને તમારું વર્તમાન ડ્રોઈંગ લેઆઉટ ફરીથી ચેક કરો.",
+      far: "તમારી પરવાનગી મળેલ Floor Area Ratio (FAR) તમારા ઝોનિંગ કેટેગરી પર નિર્ભર કરે છે. Commercial વિસ્તારોમાં વધુમાં વધુ FAR 3.0, Residential વિસ્તારોમાં 2.5, અને Mixed-Use વિસ્તારોમાં 2.8 છે. આથી વધુ થવા પર गंभीर ઉલ્લંઘન થશે અને આપમેળે નામંજૂર થઈ શકે છે.",
+      general: `હું તમારી પ્રશ્નને Grâceથી મળ્યો છે: "${userMessage}". આ પ્રોજેક્ટ (${projectName} ${location} માં) માટે નગરપાલિકા નિયમો મુજબ ઊંચાઈની મર્યાદા ${maxHeight}m સુધી અને setback નિયમો લાગુ છે. ખાતરી કરો કે તમારો ડિઝાઇન આ ઝોનિંગ ર stricctions સાથે બંધબેસે! તમે કયો વિશિષ્ટ નિયમ અથવા વિભાગ વિશ્લેષણ કરવા માંગો છો?`
+    },
+    Marathi: {
+      fireNoc: "हो, तुम्हाला Fire NOC आवश्यक आहे! या नगरपालिका मधील 15 मीटरपेक्षा जास्त उंची किंवा 3 मजल्यांपेक्षा जास्त असलेल्या कोणत्याही इमारतीसाठी मुख्य अग्निशमन अधिकारी NOC अनिवार्य आहे. तुमच्या योजनांमध्ये ड्युअल फायर एग्झिट, आपत्कालीन अलार्म आणि सक्रिय वॉटर-रायझर पाइप सिस्टम दर्शवणे आवश्यक आहे.",
+      setback: "झोनिंग नियमांनुसार, समोरच्या सेटबॅकची कमाल मर्यादा निवासी भागात 3.0 मीटर आणि वाणिज्यिक/मिश्र-उपयोगाच्या मालमत्तेसाठी 5.0 मीटर असणे आवश्यक आहे. साइडलाईन सेटबॅक निवासी भागात 1.5 मीटर आणि वाणिज्यिक संरचनांसाठी 3.0 मीटर असणे आवश्यक आहे. कृपया तुमच्या वर्तमान ड्रॉईंग लेआउटची पुन्हा तपासणी करा.",
+      far: "तुमची परवानगी असलेला Floor Area Ratio (FAR) तुमच्या झोनिंग श्रेणीवर अवलंबून असतो. वाणिज्यिक क्षेत्रात कमाल FAR 3.0, निवासी क्षेत्रात 2.5, आणि मिश्र-उपयोग क्षेत्रात 2.8 आहे. हे ओलांडल्यास गंभीर उल्लंघन होईल आणि स्वयंचलित नकार होईल.",
+      general: `मी तुमचा प्रश्न प्राप्त केला आहे: "${userMessage}". या प्रकल्पासाठी (${projectName} ${location} मध्ये) नगरपालिकेच्या नियमांनुसार उंची मर्यादा ${maxHeight}m पर्यंत आणि सेटबॅक नियम लागू आहेत. तुमचा डिझाईन या झोनिंग प्रतिबंधांशी जुळतोय की नाही हे सुनिश्चित करा! तुम्हाला कोणता विशिष्ट नियम किंवा विभाग तपासायचा आहे?`
+    },
+    Punjabi: {
+      fireNoc: "ਹਾਂ, ਤੁਹਾਨੂੰ Fire NOC ਦੀ ਲੋੜ ਹੈ! ਇਸ ਮਿਊਨਿਸਿਪਲਿਟੀ ਵਿੱਚ 15 ਮੀਟਰ ਤੋਂ ਵੱਧ ਉਚਾਈ ਜਾਂ 3 ਮੰਜ਼ਿਲਾਂ ਤੋਂ ਵੱਧ ਕਿਸੇ ਵੀ ਇਮਾਰਤ ਲਈ ਚੀਫ ਫਾਇਰ ਆਫਿਸਰ NOC ਲਾਜ਼ਮੀ ਹੈ। ਤੁਹਾਡੀਆਂ ਯੋਜਨਾਵਾਂ ਵਿੱਚ ਡਿਊਅਲ ਫਾਇਰ ਐਗਜ਼ਿਟ, ਐਮਰਜੈਂਸੀ ਅਲਾਰਮ ਅਤੇ ਐਕਟਿਵ ਵਾਟਰ-ਰਾਈਜ਼ਰ ਪਾਈਪ ਸਿਸਟਮ ਦਰਸਾਉਣੇ ਲਾਜ਼ਮੀ ਹਨ।",
+      setback: "ਜ਼ੋਨਿੰਗ ਨਿਯਮਾਂ ਅਨੁਸਾਰ, ਸਾਹਮਣੇ ਸੈੱਟਬੈਕ ਦੀ ਘੱਟੋ-ਘੱਟ ਸੀਮਾ ਰਿਹਾਇਸ਼ੀ ਖੇਤਰਾਂ ਲਈ 3.0 ਮੀਟਰ ਅਤੇ ਵਿਆਪਾਰਿਕ/ਮਿਸ਼ਰ-ਉਪਯੋਗ ਵਾਲੀਆਂ ਮਾਲਕੀ ਲਈ 5.0 ਮੀਟਰ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ। ਸਾਈਡਲਾਈਨ ਸੈੱਟਬੈਕ ਰਿਹਾਇਸ਼ੀ ਲਈ 1.5 ਮੀਟਰ ਅਤੇ ਵਿਆਪਾਰਿਕ ਸੰਰਚਨਾਵਾਂ ਲਈ 3.0 ਮੀਟਰ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਮੌਜੂਦਾ ਡਰਾਇੰਗ ਲੇਆਉਟ ਦੀ ਦੁਬਾਰਾ ਜਾਂਚ ਕਰੋ।",
+      far: "ਤੁਹਾਡੀ ਇਜਾਜ਼ਤਪ੍ਰਾਪਤ Floor Area Ratio (FAR) ਤੁਹਾਡੀ ਜ਼ੋਨਿੰਗ ਕੈਟਾਗਰੀ ਤੇ ਨਿਰਭਰ ਕਰਦੀ ਹੈ। ਵਿਆਪਾਰਿਕ ਖੇਤਰਾਂ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ FAR 3.0, ਰਿਹਾਇਸ਼ੀ ਖੇਤਰਾਂ ਵਿੱਚ 2.5, ਅਤੇ ਮਿਸ਼ਰ-ਉਪਯੋਗ ਖੇਤਰਾਂ ਵਿੱਚ 2.8 ਹੈ। ਇਸ ਤੋਂ ਵੱਧ ਹੋਣ ਤੇਗੰਭੀਰ ਉਲੰਘਨ ਹੋਵੇਗਾ ਅਤੇ ਸਵੈਚਲਿਤ ਅਸਵੀਕਾਰ ਹੋਵੇਗਾ।",
+      general: `मैंने आपकी पूछताछ प्राप्त कर ली है: "${userMessage}". ਇਸ ਪ੍ਰੋਜੈਕਟ (${projectName} ${location} ਵਿੱਚ) ਲਈ ਮਿਊਨਿਸਿਪਲ ਨਿਯਮਾਂ ਅਨੁਸਾਰ ਉਚਾਈ ਸੀਮਾ ${maxHeight}m ਤਕ ਅਤੇ ਸੈੱਟਬੈਕ ਨਿਯਮ ਲਾਗੂ ਹੁੰਦੇ ਹਨ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡਾ ਡਿਜ਼ਾਈਨ ਇਹਨਾਂ ਜ਼ੋਨਿੰਗ ਪਾਬੰਦੀਆਂ ਨਾਲ ਮੇਲ ਖਾਂਦੇ। ਤੁਸੀਂ ਕਿਹੜਾ ਖ਼ਾਸ ਨਿਯਮ ਜਾਂ ਭਾਗ ਜਾਂਚ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?`
+    },
+    Kannada: {
+      fireNoc: "ಹೌದು, ನಿಮಗೆ Fire NOC ಬೇಕಾಗಿದೆ! ಈ ಮ್ಯೂನಿಸಿಪಾಲಿಟಿಯಲ್ಲಿ 15 ಮೀಟರ್ ಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಎತ್ತರ ಅಥವಾ 3 ಮಹಡಿಗಳಿಗಿಂತ ಹೆಚ್ಚು ಇರುವ ಯಾವುದೇ ಕಟ್ಟಡಕ್ಕೆ Chief Fire Officer NOC ಅಗತ್ಯವಾಗಿರುತ್ತದೆ. ನಿಮ್ಮ ಯೋಜನೆಗಳಲ್ಲಿ ಡ್ಯೂಯಲ್ ಫೈರ್ ಎಕ್ಸಿಟ್, ಅವಶ್ಯಕ ಆಂಪ್ಲ್ ಅಲಾರಂ ಮತ್ತು ಸಕ್ರಿಯ ವಾಟರ್-ರೈಸರ್ ಪೈಪ್ ವ್ಯವಸ್ಥೆಗಳನ್ನು ಪ್ರದರ್ಶಿಸಬೇಕು.",
+      setback: "ಜೋನಿಂಗ್ ನಿಯಮಗಳ ಪ್ರಕಾರ, ಮುಂಭಾಗದ ಸೆಟ್ಬ್ಯಾಕ್ ಕನಿಷ್ಟ 3.0 ಮೀಟರ್ ವಸತಿ ಪ್ರದೇಶಗಳಿಗೆ ಮತ್ತು 5.0 ಮೀಟರ್ ವಾಣಿಜ್ಯ/ಮಿಶ್ರ-ಬಳಕೆ ಆಸ್ತಿಗಳಿಗೆ ಇರಬೇಕು. ಸೈಡ್ಲೈನ್ ಸೆಟ್ಬ್ಯಾಕ್ ವಸತಿ ಪ್ರದೇಶಗಳಲ್ಲಿ 1.5 ಮೀಟರ್ ಮತ್ತು ವಾಣಿಜ್ಯ ರಚನೆಗಳಲ್ಲಿ 3.0 ಮೀಟರ್ ಆಗಿರಬೇಕು. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಸ್ತುತ desenho ವಿನ್ಯಾಸವನ್ನು ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ.",
+      far: "ನಿಮ್ಮ ಅನುಮತಿಸಲಾದ Floor Area Ratio (FAR) ನಿಮ್ಮ ಜೋನಿಂಗ್ ವರ್ಗದ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿದೆ. ವಾಣಿಜ್ಯ ವಲಯಗಳಲ್ಲಿ ಗರಿಷ್ಠ FAR 3.0, ವಸತಿ ವಲಯಗಳಲ್ಲಿ 2.5, ಮತ್ತು ಮಿಶ್ರ-ಬಳಕೆ ವಲಯಗಳಲ್ಲಿ 2.8 ಇದೆ. ಇದನ್ನು ಮೀರಿ ಹೋದರೆ ತೀವ್ರ ಉಲ್ಲಂಘನೆ ಉಂಟಾಗಿ ಸ್ವಯಂಚಾಲಿತ ನಿರಾಕರಣೆ ಆಗುತ್ತದೆ.",
+      general: `ನಾನು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಸ್ವೀಕರಿಸಿದ್ದೇನೆ: "${userMessage}". ಈ ಯೋಜನೆಗಾಗಿ (${projectName} ${location} ನಲ್ಲಿ) ನಗರಸಭೆಯ ನಿಯಮಗಳ ಪ್ರಕಾರ ಎತ್ತರಮಿತಿ ${maxHeight}m ವರೆಗೆ ಮತ್ತು ಸೆಟ್ಬ್ಯಾಕ್ ನಿಯಮಗಳು ಅನ್ವಯಿಸುತ್ತವೆ. ನಿಮ್ಮ ವಿನ್ಯಾಸವು ಈ ಜೋನಿಂಗ್ ನಿಬಂಧನೆಗಳಿಗೆ ತಕ್ಕಂತೆ ಇರ್ಬೇಕು! ಯಾವ ನಿರ್ದಿಷ್ಟ ನಿಯಮ ಅಥವಾ ವಿಭಾಗವನ್ನು ನೀವು ವಿಶ್ಲೇಷಿಸಲು ಬಯಸುತ್ತೀರಿ?`
+    },
+    Malayalam: {
+      fireNoc: "അതെ, നിങ്ങൾക്ക് Fire NOC വേണം! ഈ നഗരസഭയിൽ 15 മീറ്ററിൽ കൂടുതലുള്ള ഉയരമോ 3 നിലകൾക്കു മുകളിൽ ഉള്ള ഏത് കെട്ടിടത്തിനും ചീഫ് ഫയർ ഓഫീസറുടെ NOC നിർബന്ധമാണ്. നിങ്ങളുടെ പ്ലാനുകളിൽ ഇരട്ട തീ എക്സിറ്റ്, അടിയന്തിര അലാറം, സജീവ വാട്ടർ-റൈസർ പൈപ്പ് സിസ്റ്റം എന്നിവ കാണിക്കണം.",
+      setback: "ജോനിംഗ് നിയമങ്ങൾ അനുസരിച്ച്, മുന്നോട്ടു നിന്ന സീറ്റ്ബാക്ക് വസതി പ്രദേശങ്ങൾക്ക് 3.0 മീറ്ററും വ്യാപാര/മിശ്ര-ഉപയോഗ സ്വത്തുക്കൾക്ക് 5.0 മീറ്ററും ആയിരിക്കണം. സൈഡ്ലൈനു സീറ്റ്ബാക്ക് വസതി പ്രദേശങ്ങളിൽ 1.5 മീറ്ററും വ്യാപാര ഘടനകൾക്ക് 3.0 മീറ്ററും ആയിരിക്കണം. ദയവായി നിങ്ങളുടെ നിലവിലെ ഡ്രോയിങ് ലേഔട്ട് വീണ്ടും പരിശോധിക്കുക.",
+      far: "നിങ്ങളുടെ അനുമതിക്കപ്പെട്ട Floor Area Ratio (FAR) നിങ്ങളുടെ ജോനിംഗ് വിഭാഗത്തെ ആശ്രയിച്ചിരിക്കുന്നു. വ്യാപാര മേഖലകൾക്ക് പരമാവധി FAR 3.0, വസതി മേഖലകൾക്ക് 2.5, മിശ്ര-ഉപയോഗ മേഖലകൾക്ക് 2.8 ആണ്. അതിനുപുറം കടന്നാൽ കർശനമായ ലംഘനം ഉണ്ടാകും കൂടാതെ സ്വയമേവ നിരസിക്കപ്പെടും.",
+      general: `നിങ്ങളുടെ ചോദ്യം ഞാൻ നേടി: "${userMessage}". ഈ പ്രോജക്ടിനായി (${projectName} ${location} എന്നിടത്ത്) മുനിസിപ്പാലിറ്റി നിയമങ്ങൾ അനുസരിച്ച് ഉയരം പരിധി ${maxHeight}m വരെ കൂടാതെ സീറ്റ്ബാക്ക് നിയമങ്ങളും ബാധകമാണ്. ನಿಮ್ಮ രൂപകൽപ്പന ഈ ജോനിംഗ് നിയന്ത്രണങ്ങൾക്കൊത്ത് നിൽക്കുന്നതാണെന്ന് ഉറപ്പാക്കുക! ഏത് പ്രത്യേക നിയമം അല്ലെങ്കിൽ വിഭാഗം നിങ്ങൾ വിശകലനം ചെയ്യാൻ ആഗ്രഹിക്കുന്നു?`
+    },
+    Telugu: {
+      fireNoc: "అవును, మీకు Fire NOC అవసరం! ఈ మునిసిపాలిటీలో 15 మీటర్ల కంటే ఎక్కువ ఎత్తు లేదా 3 అంతస్తుల కంటే ఎక్కువ ఎలాంటి భవనానికి Chief Fire Officer NOC తప్పనిసరి. మీ ప్లాన్లలో డ్యూయల్ ఫైర్ ఎగ్జిట్, అత్యవసర అలారమ్ మరియు యాక్టివ్ వాటర్-రైజర్ పైప్ సిస్టమ్ని చూపించాలి.",
+      setback: "జోనింగ్ నియమాల ప్రకారం, ముందు సెట్బ్యాక్ కనీసం వసతి ప్రాంతాల్లో 3.0 మీటర్లు మరియు వాణిజ్య/మిశ్ర-ఉపయోగ ఆస్తులలో 5.0 మీటర్లు ఉండాలి. సైడ్లైన్ సెట్బ్యాక్ వసతి ప్రాంతాల్లో 1.5 మీటర్లు మరియు వాణిజ్య నిర్మాణాల్లో 3.0 మీటర్లు ఉండాలి. దయచేసి మీ ప్రస్తుత డ్రాయింగ్ లేఅవుట్‌ను మళ్లీ తనిఖీ చేయండి.",
+      far: "మీ అనుమతించబడిన Floor Area Ratio (FAR) మీ జోనింగ్ వర్గంపై ఆధారపడి ఉంటుంది. వాణిజ్య మండలాల్లో గరిష్ఠ FAR 3.0, వసతి మండలాల్లో 2.5, మరియు మిశ్ర-ఉపయోగ మండలాల్లో 2.8. దీన్ని దాటితే తీవ్రమైన ఉల్లంఘన ఏర్పడి స్వయంచాలక తిరస్కరణకు దారితీస్తుంది.",
+      general: `నేను మీ ప్రశ్నను స్వీకరించాను: "${userMessage}". ఈ ప్రాజెక్ట్ (${projectName} ${location}లో) కోసం మున్సిపాలిటీ నియమాల ప్రకారం ఎత్తు పరిమితి ${maxHeight}m వరకు మరియు సెట్బ్యాక్ నియమాలు వర్తిస్తాయి. మీ డిజైన్ ఈ జోనింగ్ పరిమితులతో సరిపోతుందో నిర్ధారించుకోండి! మీరు ఏ ప్రత్యేక నియమం లేదా విభాగాన్ని విశ్లేషించాలనుకుంటున్నారు?`
+    },
+    Bengali: {
+      fireNoc: "হ্যাঁ, আপনার Fire NOC প্রয়োজন! এই পৌরসভায় 15 মিটার-এর বেশি উচ্চতা বা 3 তলার বেশি কোনও ভবনের জন্য প্রধান অগ্নি কর্মকর্তা NOC বাধ্যতামূলক। আপনার পরিকল্পনায় ডুয়াল ফায়ার এক্সিট, জরুরি অ্যালার্ম এবং সক্রিয় ওয়াটার-রাইসার পাইপ সিস্টেম দেখানো আবশ্যক।",
+      setback: "জোনিং বিধি অনুযায়ী, সামনের সেটব্যাকের সর্বনিম্ন সীমা আবাসিক এলাকায় 3.0 মিটার এবং বাণিজ্যিক/মিশ্র-ব্যবহার সম্পত্তিতে 5.0 মিটার হতে হবে। সাইডলাইন সেটব্যাক আবাসিক এলাকায় 1.5 মিটার এবং বাণিজ্যিক কাঠামোতে 3.0 মিটার হতে হবে। অনুগ্রহ করে আপনার বর্তমান অঙ্কন বিন্যাস আবার পরীক্ষা করুন।",
+      far: "আপনার অনুমোদিত Floor Area Ratio (FAR) আপনার জোনিং বিভাগের উপর নির্ভর করে। বাণিজ্যিক অঞ্চলে সর্বাধিক FAR 3.0, আবাসিক অঞ্চলে 2.5, এবং মিশ্র-ব্যবহার অঞ্চলে 2.8। এর বেশি হলে গুরুতর লঙ্ঘন হবে এবং স্বয়ংক্রিয় প্রত্যাখ্যান হবে।",
+      general: `আমি আপনার প্রশ্ন পেয়েছি: "${userMessage}". এই প্রকল্পের (${projectName} ${location}এ) জন্য পৌরসভার নিয়ম অনুযায়ী উচ্চতা সীমা ${maxHeight}m পর্যন্ত এবং সেটব্যাক নিয়ম প্রযোজ্য। নিশ্চিত করুন আপনার ডিজাইন এই জোনিং বিধিগুলির সাথে মিলছে! আপনি কোন নির্দিষ্ট নিয়ম বা বিভাগ বিশ্লেষণ করতে চান?`
+    },
+    Odia: {
+      fireNoc: "ହଁ, ଆପଣଙ୍କୁ Fire NOC ଆବଶ୍ୟକ! ଏହି ପୁରସକାର ସଂସ୍ଥାରେ 15 ମିଟରରୁ ଅଧିକ ଉଚ୍ଚତା କିମ୍ବା 3 ଟି ମଜଲାରୁ ଅଧିକ ଯେକୌଣସି ଭବନ ପାଇଁ ଚିଫ ଫାୟାର ଅଫିସର NOC ଆବଶ୍ୟକ। ଆପଣଙ୍କର ଯୋଜନାରେ ଡୁଆଲ ଫାୟାର ଏଗ୍ଜିଟ, ଆବଶ୍ୟକ ଆଲାର୍ମ ଏବଂ ସକ୍ରିୟ ୱାଟର-ରାଇସର ପାଇପ ସିଷ୍ଟମ ଦେଖାଇବା ଆବଶ୍ୟକ।",
+      setback: "ଜୋନିଙ୍ଗ ନିୟମ ଅନୁସାରେ, ସାମ୍ନା ସେଟବ୍ୟାକ୍ କ୍ଷେତ୍ରରେ 3.0 ମିଟର ଏବଂ ବାଣିଜ୍ୟିକ/ମିଶ୍ର-ଉପଯୋଗ ସମ୍ପତ୍ତିରେ 5.0 ମିଟର ହେବା ଆବଶ୍ୟକ। ସାଇଡଲାଇନ ସେଟବ୍ୟାକ୍ ଆବାସିକ କ୍ଷେତ୍ରରେ 1.5 ମିଟର ଏବଂ ବାଣିଜ୍ୟିକ ଗଠନରେ 3.0 ମିଟର ହେବା ଆବଶ୍ୟକ। ଦୟାକରି ଆପଣଙ୍କର ସାମ୍ପ୍ରତିକ ଡ୍ରାଏଂ ଲେଆଉଟ ପୁନଃ ଯାଞ୍ଚ କରନ୍ତୁ।",
+      far: "ଆପଣଙ୍କର ଅନୁମତିପ୍ରାପ୍ତ Floor Area Ratio (FAR) ଆପଣଙ୍କ ଜୋନିଙ୍ଗ ବର୍ଗ ଉପରେ ନିର୍ଭର କରେ। ବାଣିଜ୍ୟିକ କ୍ଷେତ୍ରରେ ସର୍ବାଧିକ FAR 3.0, ଆବାସିକ କ୍ଷେତ୍ରରେ 2.5, ଏବଂ ମିଶ୍ର-ଉପଯୋଗ କ୍ଷେତ୍ରରେ 2.8। ଏହା ଅତିକ୍ରମ କଲେ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଉଲ୍ଲଂଘନ ହେବ ଏବଂ ସ୍ୱୟଂଚାଳିତ ନିରାସ୍ତ କରାଯିବ।",
+      general: `ମୁଁ ଆପଣଙ୍କ ପ୍ରଶ୍ନ ପାଇଲି: "${userMessage}". ଏହି ପ୍ରକଳ୍ପ ପାଇଁ (${projectName} ${location}ରେ) ପୁରସଂସ୍ଥା ନିୟମ ଅନୁସାରେ ଉଚ୍ଚତା ସୀମା ${maxHeight}m ଯାଏଁ ଏବଂ ସେଟବ୍ୟାକ୍ ନିୟମ ପ୍ରଯୋଜ୍ୟ। ନିଶ୍ଚିତ କରନ୍ତୁ ଆପଣଙ୍କ ଡିଜାଇନ ଏହି ଜୋନିଙ୍ଗ ପ୍ରତିବନ୍ଧର ସହିତ ମେଳ ଖାଉଛି! ଆପଣ କେଉଁ ନିର୍ଦ୍ଧାରିତ ନିୟମ କିମ୍ବା ବିଭାଗ ଅନୁଶୋଧନ କରିବାକୁ ଚାହୁଁଥିବେ?`
+    },
+    Assamese: {
+      fireNoc: "হয়, আপোনাৰ Fire NOC প্রয়োজন! এই পৌরসভাত 15 মিটাৰৰ অধিক উচ্চতা বা 3 তলাৰ অধিক কোনো বিল্ডিংৰ বাবে Chief Fire Officer NOC বাধ্যতামূলক। আপোনাৰ পরিকল্পনাত ডুয়াল ফায়ার এক্সিট, জরুরি অ্যালার্ম আৰু সক্রিয় ওয়াটার-রাইসার পাইপ সিস্টেম দেখুওৱা আবশ্যক।",
+      setback: "জোনিং নিয়ম অনুসারে, সামনে থকা সেটব্যাক আবাসিক এলাকাতে 3.0 মিটার আৰু বাণিজ্যিক/মিশ্র-ব্যবহার সম্পত্তিত 5.0 মিটার হ'ব লাগিব। সাইডলাইন সেটব্যাক আবাসিক এলাকাতে 1.5 মিটার আৰু বাণিজ্যিক কাঠামোত 3.0 মিটার হ'ব লাগিব। অনুগ্ৰহ কৰি আপোনাৰ বৰ্তমান দৃশ্যমান আউটলেট পুনৰ পরীক্ষণ কৰক।",
+      far: "আপোনাৰ অনুমোদিত Floor Area Ratio (FAR) আপোনাৰ জোনিং শ্ৰেণীৰ ওপৰত নিৰ্ভৰ কৰে। বাণিজ্যিক অঞ্চলসমূহত সর্বাধিক FAR 3.0, আবাসিক অঞ্চলসমূহত 2.5, আৰু মিশ্র-ব্যবহার অঞ্চলসমূহত 2.8। ইয়াৰ উপৰিও হলে গুরুতর লঙ্ঘন হ'ব আৰু স্বয়ংক্রিয় প্রত্যাখ্যান হ'ব।",
+      general: `মই আপোনাৰ প্রশ্ন পায়ে: "${userMessage}". এই প্রকল্পৰ (${projectName} ${location}ত) বাবে পৌরসভা নিয়ম অনুসারে উচ্চতা সীমা ${maxHeight}m পর্যন্ত আৰু সেটব্যাক নিয়ম প্রযোজ্য। নিশ্চিত কৰক যে আপোনাৰ ডিজাইন এই জোনিং বিধিসমূহৰ সৈতে মিলিত হৈছে! আপুনি কোন বিশেষ নিয়ম বা বিভাগ বিশ্লেষণ কৰিব বিচাৰে?`
+    }
+  };
+
+  const languageResponse = responses[language];
+  if (lowerMessage.includes("fire noc") || lowerMessage.includes("fire safety")) {
+    return languageResponse?.fireNoc || "Yes, you require a Fire NOC! In this municipality, a Chief Fire Officer NOC is mandatory for any building taller than 15 meters or over 3 floors in height. Your plans must show dual fire exits, emergency alarms, and active wet-riser pipe systems to receive fire board approval.";
+  }
+
+  if (lowerMessage.includes("setback") || lowerMessage.includes("boundary")) {
+    return languageResponse?.setback || "Zoning rules state that the front setback must be a minimum of 3.0 meters for residential areas, and 5.0 meters for commercial or mixed-use properties. Sideline setback borders must be at least 1.5 meters for residential and 3.0 meters for commercial structures. Please double-check your current drawing layout.";
+  }
+
+  if (lowerMessage.includes("floor") || lowerMessage.includes("far")) {
+    return languageResponse?.far || "Your permissible Floor Area Ratio (FAR) depends on your zoning category. Commercial sectors permit a maximum FAR of 3.0, Residential sectors permit 2.5, and Mixed-Use sectors permit 2.8. Exceeding this will cause a critical violation and trigger automatic rejection.";
+  }
+
+  return languageResponse?.general || `I have received your query: "${userMessage}". For this project (${projectName} in ${location}), municipal rules govern height limits of up to ${maxHeight}m and setbacks. Make sure your design aligns with these zoning restrictions! What specific rule or section would you like me to analyze next?`;
+};
+
 // Sarvam AI Assistant Chatbot with regulation context
 app.post("/api/chat", async (req, res) => {
-  const { messages, projectContext } = req.body;
-  const userMessage = messages[messages.length - 1].text;
+  const { messages, projectContext, selectedLang } = req.body;
+  const userMessage = messages[messages.length - 1]?.text || "";
+  const language = selectedLang || "English";
 
+  const normalizedLanguage = normalizeLanguage(language);
   const systemInstruction = `
     You are "Sarvam AI Compliance Autopilot" for PermitFlow.
     You assist contractors, architects, and builders with municipal regulations, setback compliance, FAR queries, and fire NOC requisites.
@@ -821,22 +1018,12 @@ app.post("/api/chat", async (req, res) => {
     - Fire NOC: Mandatory for all structures with height > 15m or floors > 3.
 
     Always answer in clear, professional, direct, human-friendly terms. Avoid robotic jargon, keep it structured, highlight warnings or violations of setbacks or FAR if any exist in the projectContext, and supply precise guidance.
+    The selected language is ${normalizedLanguage}. Respond entirely in ${normalizedLanguage}. If ${normalizedLanguage} is English, answer in English. For Hindi, Tamil, Gujarati, Marathi, Punjabi, Kannada, Malayalam, Telugu, Bengali, Odia, or Assamese, answer in that language.
   `;
 
   if (!ai) {
-    // Extremely helpful standard fallback
-    let responseText = "As your AI Compliance assistant, I am happy to help! ";
-    if (userMessage.toLowerCase().includes("fire noc") || userMessage.toLowerCase().includes("fire safety")) {
-      responseText = "Yes, you require a Fire NOC! In this municipality, a Chief Fire Officer NOC is mandatory for any building taller than 15 meters or over 3 floors in height. Your plans must show dual fire exits, emergency alarms, and active wet-riser pipe systems to receive fire board approval.";
-    } else if (userMessage.toLowerCase().includes("setback") || userMessage.toLowerCase().includes("boundary")) {
-      responseText = "Zoning rules state that the front setback must be a minimum of 3.0 meters for residential areas, and 5.0 meters for commercial or mixed-use properties. Sideline setback borders must be at least 1.5 meters for residential and 3.0 meters for commercial structures. Please double-check your current drawing layout.";
-    } else if (userMessage.toLowerCase().includes("floor") || userMessage.toLowerCase().includes("far")) {
-      responseText = "Your permissible Floor Area Ratio (FAR) depends on your zoning category. Commercial sectors permit a maximum FAR of 3.0, Residential sectors permit 2.5, and Mixed-Use sectors permit 2.8. Exceeding this will cause a critical violation and trigger automatic rejection.";
-    } else {
-      responseText = `I have received your query: "${userMessage}". For this project (${projectContext?.name || 'New Project'} in ${projectContext?.location || 'Smart City'}), municipal rules govern height limits of up to ${projectContext?.buildingType === "Commercial" ? "50" : "15"}m and setbacks. Make sure your design aligns with these zoning restrictions! What specific rule or section would you like me to analyze next?`;
-    }
-
-    return res.json({ text: responseText });
+    const responseText = getLocalizedChatFallbackV2(userMessage, projectContext, language);
+    return res.json({ text: responseText, localized: true });
   }
 
   try {
@@ -858,23 +1045,12 @@ app.post("/api/chat", async (req, res) => {
       }
     });
 
-    res.json({ text: response.text });
+    res.json({ text: response.text, localized: true });
   } catch (err: any) {
     console.error("Gemini Chat error, using smart fallback simulation:", err);
     
-    // Extremely helpful standard fallback
-    let responseText = "As your AI Compliance assistant, I am happy to help! ";
-    if (userMessage.toLowerCase().includes("fire noc") || userMessage.toLowerCase().includes("fire safety")) {
-      responseText = "Yes, you require a Fire NOC! In this municipality, a Chief Fire Officer NOC is mandatory for any building taller than 15 meters or over 3 floors in height. Your plans must show dual fire exits, emergency alarms, and active wet-riser pipe systems to receive fire board approval.";
-    } else if (userMessage.toLowerCase().includes("setback") || userMessage.toLowerCase().includes("boundary")) {
-      responseText = "Zoning rules state that the front setback must be a minimum of 3.0 meters for residential areas, and 5.0 meters for commercial or mixed-use properties. Sideline setback borders must be at least 1.5 meters for residential and 3.0 meters for commercial structures. Please double-check your current drawing layout.";
-    } else if (userMessage.toLowerCase().includes("floor") || userMessage.toLowerCase().includes("far")) {
-      responseText = "Your permissible Floor Area Ratio (FAR) depends on your zoning category. Commercial sectors permit a maximum FAR of 3.0, Residential sectors permit 2.5, and Mixed-Use sectors permit 2.8. Exceeding this will cause a critical violation and trigger automatic rejection.";
-    } else {
-      responseText = `I have received your query: "${userMessage}". For this project (${projectContext?.name || 'New Project'} in ${projectContext?.location || 'Smart City'}), municipal rules govern height limits of up to ${projectContext?.buildingType === "Commercial" ? "50" : "15"}m and setbacks. Make sure your design aligns with these zoning restrictions! What specific rule or section would you like me to analyze next?`;
-    }
-
-    res.json({ text: responseText });
+    const responseText = getLocalizedChatFallbackV2(userMessage, projectContext, language);
+    res.json({ text: responseText, localized: true });
   }
 });
 
@@ -915,8 +1091,8 @@ app.post("/api/voice/tts", async (req, res) => {
     "en-IN": "meera"
   };
 
-  const targetLanguage = selectedLang || "Hindi";
-  const targetLangCode = langMappings[targetLanguage] || "hi-IN";
+  const targetLanguage = normalizeLanguage(selectedLang);
+  const targetLangCode = langMappings[targetLanguage] || langMappings["Hindi"];
   const speaker = speakerMappings[targetLangCode] || "meera";
 
   if (sarvamKey) {
@@ -997,6 +1173,7 @@ app.post("/api/translation", async (req, res) => {
   
   // Language Mapping
   const langMappings: Record<string, string> = {
+    "English": "en-IN",
     "Hindi": "hi-IN",
     "Tamil": "ta-IN",
     "Telugu": "te-IN",
@@ -1010,7 +1187,8 @@ app.post("/api/translation", async (req, res) => {
     "Assamese": "as-IN"
   };
 
-  const targetLangCode = langMappings[targetLanguage] || "hi-IN";
+  const normalizedTargetLanguage = normalizeLanguage(targetLanguage);
+  const targetLangCode = langMappings[normalizedTargetLanguage] || langMappings["Hindi"];
 
   if (sarvamKey) {
     try {

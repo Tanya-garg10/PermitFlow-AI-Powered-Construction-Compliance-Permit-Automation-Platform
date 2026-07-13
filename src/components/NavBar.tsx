@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, UserRole, AppNotification } from '../types';
 import { Shield, Languages, Bell, LogIn, LogOut, FileCheck, Menu, X } from 'lucide-react';
+import { translateText } from '../i18n';
 
 interface NavBarProps {
   currentUser: User | null;
@@ -28,6 +29,7 @@ export default function NavBar({
   const [showBell, setShowBell] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
 
+  const t = (text: string) => translateText(text, selectedLang);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const languages = [
@@ -35,18 +37,6 @@ export default function NavBar({
   ];
 
   const roles: UserRole[] = ['Contractor', 'Architect', 'Municipal Officer', 'Admin'];
-
-  // Simple dictionary translation for titles on the navbar
-  const translate = (text: string) => {
-    if (selectedLang === 'Hindi') {
-      if (text === 'PermitFlow') return 'परमिटफ्लो';
-      if (text === 'The Construction Compliance Autopilot') return 'भवन अनुपालन ऑटोपायलट';
-    }
-    if (selectedLang === 'Tamil') {
-      if (text === 'PermitFlow') return 'பெர்மிட்ஃப்ளோ';
-    }
-    return text;
-  };
 
   return (
     <header id="app-header" className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 text-slate-800">
@@ -60,10 +50,10 @@ export default function NavBar({
             </div>
             <div>
               <span className="font-sans font-black text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600">
-                {translate('PermitFlow')}
+                {t('PermitFlow')}
               </span>
               <p className="text-[9px] font-mono font-bold text-blue-600 tracking-wider hidden sm:block">
-                {translate('The Construction Compliance Autopilot')}
+                {t('The Construction Compliance Autopilot')}
               </p>
             </div>
           </div>
@@ -71,7 +61,7 @@ export default function NavBar({
           {/* Center Role Quick-Switcher for Demonstration */}
           <div className="hidden lg:flex items-center space-x-2 bg-slate-100/80 px-3.5 py-1.5 rounded-full border border-slate-200">
             <span className="text-[10px] text-slate-500 font-mono flex items-center gap-1 font-bold uppercase tracking-wider">
-              <Shield className="w-3.5 h-3.5 text-blue-600" /> Demo Role:
+              <Shield className="w-3.5 h-3.5 text-blue-600" /> {t('Demo Role:')}
             </span>
             <div className="flex items-center space-x-1">
               {roles.map((role) => (
@@ -129,14 +119,14 @@ export default function NavBar({
               {showBell && (
                 <div id="notification-dropdown" className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl p-3 z-50">
                   <div className="flex justify-between items-center pb-2 mb-2 border-b border-slate-100">
-                    <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">System Alerts</span>
+                    <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">{t('System Alerts')}</span>
                     {unreadCount > 0 && (
-                      <span className="text-[10px] text-slate-400 italic">Click message to read</span>
+                      <span className="text-[10px] text-slate-400 italic">{t('Click message to read')}</span>
                     )}
                   </div>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <p className="text-xs text-slate-400 py-3 text-center">No new notifications</p>
+                      <p className="text-xs text-slate-400 py-3 text-center">{t('No new notifications')}</p>
                     ) : (
                       notifications.map((n) => (
                         <div
@@ -168,13 +158,13 @@ export default function NavBar({
               <div className="flex items-center space-x-3 pl-2 border-l border-slate-200">
                 <div className="text-right">
                   <p className="text-xs font-bold text-slate-800">{currentUser.name}</p>
-                  <p className="text-[10px] font-mono text-blue-600 font-bold">{currentRole}</p>
+                  <p className="text-[10px] font-mono text-blue-600 font-bold">{t(currentRole)}</p>
                 </div>
                 <button
                   id="logout-btn"
                   onClick={onLogout}
                   className="p-2 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 rounded-lg border border-slate-200 text-slate-500 transition-colors"
-                  title="Logout"
+                  title={t('Logout')}
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -242,7 +232,7 @@ export default function NavBar({
           </div>
 
           <div className="flex justify-between items-center py-2 border-t border-slate-100 pl-1">
-            <span className="text-xs font-bold text-slate-500">User Session</span>
+            <span className="text-xs font-bold text-slate-500">{t('User Session')}</span>
             {currentUser ? (
               <div className="flex items-center space-x-3">
                 <span className="text-xs text-slate-800 font-bold">{currentUser.name} ({currentRole})</span>
@@ -254,7 +244,7 @@ export default function NavBar({
                   }}
                   className="px-3 py-1 bg-red-50 border border-red-200 hover:bg-red-100 text-xs text-red-600 font-semibold rounded-lg"
                 >
-                  Log Out
+                  {t('Log Out')}
                 </button>
               </div>
             ) : (
@@ -266,7 +256,7 @@ export default function NavBar({
                 }}
                 className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-xs text-white font-bold rounded-lg"
               >
-                Login
+                {t('Portal Login')}
               </button>
             )}
           </div>

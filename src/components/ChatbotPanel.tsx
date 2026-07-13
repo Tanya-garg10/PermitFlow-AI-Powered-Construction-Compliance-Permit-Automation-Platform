@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Project, ChatMessage } from '../types';
 import { Send, Bot, User, Trash2, Volume2 } from 'lucide-react';
+import { getChatUiCopy, getChatLanguageHint, getSpeechLanguageCode } from '../chatLocalization';
+import { normalizeAudioPayload } from '../tts';
 
 interface ChatbotPanelProps {
   currentProject: Project | null;
@@ -8,11 +10,13 @@ interface ChatbotPanelProps {
 }
 
 export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPanelProps) {
+  const chatCopy = getChatUiCopy(selectedLang);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "msg-init",
       sender: "assistant",
-      text: "Hello! I am your Sarvam AI Compliance Assistant. Ask me anything about municipal zoning codes, FAR restrictions, setbacks, fire NOCs, or the regulatory scorecard of your active project.",
+      text: getChatUiCopy(selectedLang).initialMessage,
       timestamp: new Date().toLocaleTimeString()
     }
   ]);
@@ -22,12 +26,15 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const suggestionChips = [
-    "Do I need Fire NOC?",
-    "Explain setback rule.",
-    "Can I build 6 floors?",
-    "Why is my project rejected?"
-  ];
+  const suggestionChips = chatCopy.suggestions;
+
+  useEffect(() => {
+    setMessages(prev => {
+      const firstMessage = prev[0];
+      if (!firstMessage || firstMessage.id !== 'msg-init') return prev;
+      return [{ ...firstMessage, text: chatCopy.initialMessage }];
+    });
+  }, [chatCopy.initialMessage]);
 
   // Auto scroll
   useEffect(() => {
@@ -56,7 +63,8 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, userMsg],
-          projectContext: currentProject || {}
+          projectContext: currentProject || {},
+          selectedLang
         })
       });
 
@@ -64,8 +72,8 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
       
       let assistantText = data.text;
 
-      // Handle translation on client-side if a local language is selected
-      if (selectedLang !== 'English') {
+      // Handle translation on client-side only when the server did not already localize the reply.
+      if (selectedLang !== 'English' && data.localized !== true) {
         const transRes = await fetch('/api/translation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -89,7 +97,7 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
       setMessages(prev => [...prev, {
         id: "msg-" + (Date.now() + 1),
         sender: "assistant",
-        text: "I encountered an error connecting to Sarvam Document Intelligence. Please verify your municipal database links.",
+        text: chatCopy.errorMessage,
         timestamp: new Date().toLocaleTimeString()
       }]);
     } finally {
@@ -106,20 +114,29 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
         body: JSON.stringify({ text, selectedLang })
       });
       const data = await res.json();
-      
-      if (data.audioData && data.audioData !== "fallback_mock_base64_audio") {
-        const audioBytes = Uint8Array.from(atob(data.audioData), c => c.charCodeAt(0));
-        const audioBlob = new Blob([audioBytes], { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.onended = () => setTtsPlayingId(null);
-        audio.play();
+      const normalizedAudio = normalizeAudioPayload(data.audioData);
+
+      if (normalizedAudio) {
+        try {
+          const audioBytes = Uint8Array.from(atob(normalizedAudio.base64), c => c.charCodeAt(0));
+          const audioBlob = new Blob([audioBytes], { type: normalizedAudio.mimeType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.onended = () => {
+            setTtsPlayingId(null);
+            URL.revokeObjectURL(audioUrl);
+          };
+          await audio.play();
+        } catch (audioErr) {
+          console.warn('Audio playback failed, falling back to browser speech synthesis:', audioErr);
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = getSpeechLanguageCode(selectedLang);
+          utterance.onend = () => setTtsPlayingId(null);
+          window.speechSynthesis.speak(utterance);
+        }
       } else {
         const utterance = new SpeechSynthesisUtterance(text);
-        if (selectedLang === 'Hindi') utterance.lang = 'hi-IN';
-        else if (selectedLang === 'Tamil') utterance.lang = 'ta-IN';
-        else utterance.lang = 'en-US';
-
+        utterance.lang = getSpeechLanguageCode(selectedLang);
         utterance.onend = () => setTtsPlayingId(null);
         window.speechSynthesis.speak(utterance);
       }
@@ -134,7 +151,7 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
       {
         id: "msg-init",
         sender: "assistant",
-        text: "Chat cleared. Ask me another question about municipal building codes or active zoning projects.",
+        text: chatCopy.clearMessage,
         timestamp: new Date().toLocaleTimeString()
       }
     ]);
@@ -151,10 +168,10 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
           </div>
           <div>
             <h3 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              Sarvam AI Assistant <span className="text-[9px] font-mono font-bold text-blue-600 uppercase">Q&A</span>
+              {chatCopy.assistantTitle} <span className="text-[9px] font-mono font-bold text-blue-600 uppercase">Q&A</span>
             </h3>
             <p className="text-[10px] text-slate-500">
-              {currentProject ? `Assisting: ${currentProject.name}` : "Zoning & Compliance Consultation"}
+              {currentProject ? `Assisting: ${currentProject.name}` : chatCopy.assistantSubtitle}
             </p>
           </div>
         </div>
@@ -217,7 +234,7 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
                       }`}
                     >
                       <Volume2 className="w-3.5 h-3.5" />
-                      <span>{ttsPlayingId === m.id ? 'SPEAKING...' : 'SPEAK'}</span>
+                      <span>{ttsPlayingId === m.id ? chatCopy.speakingLabel : chatCopy.speakLabel}</span>
                     </button>
                   )}
                 </div>
@@ -234,10 +251,12 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
         {isLoading && (
           <div className="flex gap-2 items-center text-slate-400 text-xs font-mono py-1">
             <span className="w-2.5 h-2.5 rounded-full border-2 border-slate-400 border-t-transparent animate-spin" />
-            <span>AI Compliance Autopilot is processing...</span>
+            <span>{chatCopy.loadingText}</span>
           </div>
         )}
       </div>
+
+      <div className="px-3 pt-2 pb-1 text-[10px] text-slate-500">{getChatLanguageHint(selectedLang)}</div>
 
       {/* Input Tray */}
       <div className="p-3 bg-slate-50 border-t border-slate-200">
@@ -248,7 +267,7 @@ export default function ChatbotPanel({ currentProject, selectedLang }: ChatbotPa
             value={inputMsg}
             onChange={(e) => setInputMsg(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputMsg)}
-            placeholder="Ask AI: e.g., setback rules, or Fire NOC clearances..."
+            placeholder={chatCopy.inputPlaceholder}
             className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium"
           />
           <button

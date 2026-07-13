@@ -1,55 +1,58 @@
 import React from 'react';
 import { FileSearch, Sparkles, Navigation, Layers, ShieldCheck, Languages, ArrowRight, ChevronRight, Volume2, HardHat } from 'lucide-react';
 import { motion } from 'motion/react';
+import { translateText } from '../i18n';
 
 interface LandingPageProps {
+  selectedLang: string;
   onStartClick: () => void;
   onDemoClick: () => void;
 }
 
-export default function LandingPage({ onStartClick, onDemoClick }: LandingPageProps) {
+export default function LandingPage({ selectedLang, onStartClick, onDemoClick }: LandingPageProps) {
+  const t = (text: string) => translateText(text, selectedLang);
   const stats = [
-    { label: "Permits Processed", value: "24,800+", desc: "Across 14 Municipalities", color: "text-blue-600" },
-    { label: "Compliance Success Rate", value: "98.4%", desc: "Direct First-Time Passes", color: "text-emerald-600" },
-    { label: "Approval Time Reduced", value: "82%", desc: "From Months to Weeks", color: "text-indigo-600" }
+    { label: t("Permits Processed"), value: "24,800+", desc: t("Across 14 Municipalities"), color: "text-blue-600" },
+    { label: t("Compliance Success Rate"), value: "98.4%", desc: t("Direct First-Time Passes"), color: "text-emerald-600" },
+    { label: t("Approval Time Reduced"), value: "82%", desc: t("From Months to Weeks"), color: "text-indigo-600" }
   ];
 
   const features = [
     {
       icon: <Sparkles className="w-5 h-5 text-amber-600" />,
       bg: "bg-amber-50 border-amber-100",
-      title: "AI Blueprint Analysis",
-      desc: "Our deep document intelligence extracts dimensions, FAR calculations, setbacks, and road widths automatically from standard blueprint PDFs."
+      title: t("AI Blueprint Analysis"),
+      desc: t("Our deep document intelligence extracts dimensions, FAR calculations, setbacks, and road widths automatically from standard blueprint PDFs.")
     },
     {
       icon: <FileSearch className="w-5 h-5 text-blue-600" />,
       bg: "bg-blue-50 border-blue-100",
-      title: "Real-Time Regulation Check",
-      desc: "Instant automated auditing against municipal zoning restrictions, regional building codes, environmental guidelines, and fire safety provisions."
+      title: t("Real-Time Regulation Check"),
+      desc: t("Instant automated auditing against municipal zoning restrictions, regional building codes, environmental guidelines, and fire safety provisions.")
     },
     {
       icon: <Navigation className="w-5 h-5 text-cyan-600" />,
       bg: "bg-cyan-50 border-cyan-100",
-      title: "Permit Process Tracking",
-      desc: "Track submissions in real-time with our interactive progress pipeline, receiving visual status logs at each verification checkpoint."
+      title: t("Permit Process Tracking"),
+      desc: t("Track submissions in real-time with our interactive progress pipeline, receiving visual status logs at each verification checkpoint.")
     },
     {
       icon: <Layers className="w-5 h-5 text-purple-600" />,
       bg: "bg-purple-50 border-purple-100",
-      title: "Government Form Autofill",
-      desc: "Never copy data twice. AI intelligently pre-populates official local and state municipality forms from blueprint schematics."
+      title: t("Government Form Autofill"),
+      desc: t("Never copy data twice. AI intelligently pre-populates official local and state municipality forms from blueprint schematics.")
     },
     {
       icon: <Volume2 className="w-5 h-5 text-pink-600" />,
       bg: "bg-pink-50 border-pink-100",
-      title: "Sarvam Voice Assistant",
-      desc: "Speak your dimensions in Hindi, Tamil, or English, and watch the platform automatically transcribe, parse, and fill forms."
+      title: t("Sarvam Voice Assistant"),
+      desc: t("Speak your dimensions in Hindi, Tamil, or English, and watch the platform automatically transcribe, parse, and fill forms.")
     },
     {
       icon: <Languages className="w-5 h-5 text-emerald-600" />,
       bg: "bg-emerald-50 border-emerald-100",
-      title: "Multilingual Intelligence",
-      desc: "Translate compliance audits and speak with the AI assistant chatbot in 9 Indian languages for localized collaboration."
+      title: t("Multilingual Intelligence"),
+      desc: t("Translate compliance audits and speak with the AI assistant chatbot in 9 Indian languages for localized collaboration.")
     }
   ];
 
@@ -71,20 +74,20 @@ export default function LandingPage({ onStartClick, onDemoClick }: LandingPagePr
         {/* Top Announcement Badge */}
         <div className="inline-flex items-center space-x-2 bg-white border border-slate-200 rounded-full px-4 py-1.5 mb-8 text-xs text-blue-700 shadow-sm backdrop-blur-md animate-bounce">
           <HardHat className="w-3.5 h-3.5 text-blue-600" />
-          <span className="font-semibold">Powered by Sarvam AI Document Intelligence</span>
+          <span className="font-semibold">{t('Powered by Sarvam AI Document Intelligence')}</span>
         </div>
 
         {/* Hero Section */}
         <div className="text-center max-w-4xl">
           <h1 className="font-sans font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight leading-none mb-6">
-            <span className="block text-slate-900 font-black">PermitFlow</span>
+            <span className="block text-slate-900 font-black">{t('PermitFlow')}</span>
             <span className="block mt-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 py-1">
-              The Construction Compliance Autopilot
+              {t('The Construction Compliance Autopilot')}
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-10">
-            Upload your construction project blueprints. Our AI checks zoning regulations, detects safety and design compliance gaps, auto-fills municipal permit forms, and guides you step-by-step to approval.
+            {t('Upload your construction project blueprints. Our AI checks zoning regulations, detects safety and design compliance gaps, auto-fills municipal permit forms, and guides you step-by-step to approval.')}
           </p>
 
           {/* Call to Actions */}
@@ -94,7 +97,7 @@ export default function LandingPage({ onStartClick, onDemoClick }: LandingPagePr
               onClick={onStartClick}
               className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium text-sm text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 transform hover:-translate-y-0.5"
             >
-              <span>Start Project Wizard</span>
+              <span>{t('Start Project Wizard')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -103,7 +106,7 @@ export default function LandingPage({ onStartClick, onDemoClick }: LandingPagePr
               onClick={onDemoClick}
               className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-4 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl font-medium text-sm text-slate-700 shadow-sm transition-all"
             >
-              <span>Launch Demo Console</span>
+              <span>{t('Launch Demo Console')}</span>
               <ChevronRight className="w-4 h-4 text-slate-500" />
             </button>
           </div>
@@ -129,12 +132,12 @@ export default function LandingPage({ onStartClick, onDemoClick }: LandingPagePr
         {/* Features Grid */}
         <div className="w-full max-w-6xl">
           <div className="text-center mb-16">
-            <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Core Capabilities</span>
+            <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">{t('Core Capabilities')}</span>
             <h2 className="text-3xl font-sans font-black text-slate-900 mt-4">
-              Next-Gen Municipal Blueprint Automation
+              {t('Next-Gen Municipal Blueprint Automation')}
             </h2>
             <p className="text-sm text-slate-500 mt-3 max-w-xl mx-auto leading-relaxed">
-              PermitFlow bridges the gap between complicated building code booklets and architectural schematics in seconds.
+              {t('PermitFlow bridges the gap between complicated building code booklets and architectural schematics in seconds.')}
             </p>
           </div>
 
@@ -147,8 +150,8 @@ export default function LandingPage({ onStartClick, onDemoClick }: LandingPagePr
                 <div className={`p-3 border rounded-xl inline-block mb-4 transition-colors ${ft.bg}`}>
                   {ft.icon}
                 </div>
-                <h3 className="text-base font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">{ft.title}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{ft.desc}</p>
+                <h3 className="text-base font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">{t(ft.title)}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{t(ft.desc)}</p>
               </div>
             ))}
           </div>
@@ -158,9 +161,9 @@ export default function LandingPage({ onStartClick, onDemoClick }: LandingPagePr
         <div className="mt-24 pt-8 border-t border-slate-200 w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© 2026 PermitFlow Technologies. Municipal AI Autopilot Network.</p>
           <div className="flex space-x-4">
-            <span className="hover:text-blue-600 cursor-pointer transition-colors">Security Standards</span>
-            <span className="hover:text-blue-600 cursor-pointer transition-colors">Regulatory Coverage</span>
-            <span className="hover:text-blue-600 cursor-pointer transition-colors">API Integration Docs</span>
+            <span className="hover:text-blue-600 cursor-pointer transition-colors">{t('Security Standards')}</span>
+            <span className="hover:text-blue-600 cursor-pointer transition-colors">{t('Regulatory Coverage')}</span>
+            <span className="hover:text-blue-600 cursor-pointer transition-colors">{t('API Integration Docs')}</span>
           </div>
         </div>
         

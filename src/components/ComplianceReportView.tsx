@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Project, ComplianceIssue } from '../types';
 import { CheckCircle2, AlertTriangle, XCircle, HelpCircle, FileDown, Send, ArrowLeft } from 'lucide-react';
 import BlueprintVisualizer from './BlueprintVisualizer';
+import { translateText } from '../i18n';
 
 interface ComplianceReportViewProps {
   project: Project;
@@ -11,6 +12,7 @@ interface ComplianceReportViewProps {
 }
 
 export default function ComplianceReportView({ project, onBack, onSubmitPermit, selectedLang }: ComplianceReportViewProps) {
+  const t = (text: string) => translateText(text, selectedLang);
   const [activeTab, setActiveTab] = useState<'report' | 'form' | 'tracker'>('report');
   const [downloading, setDownloading] = useState(false);
 
@@ -93,11 +95,11 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
   };
 
   const permitStatuses = [
-    { label: "Draft", desc: "Project portfolio initialized", num: 1 },
-    { label: "Submitted", desc: "Filing dispatched to municipality", num: 2 },
-    { label: "Under Review", desc: "Officer verification active", num: 3 },
-    { label: "Document Verification", desc: "Secondary certificates review", num: 4 },
-    { label: "Approved", desc: "Zoning Permit Certificate signed", num: 5 }
+    { label: t('Draft'), desc: t('Project portfolio initialized'), num: 1 },
+    { label: t('Submitted'), desc: t('Filing dispatched to municipality'), num: 2 },
+    { label: t('Under Review'), desc: t('Officer verification active'), num: 3 },
+    { label: t('Document Verification'), desc: t('Secondary certificates review'), num: 4 },
+    { label: t('Approved'), desc: t('Zoning Permit Certificate signed'), num: 5 }
   ];
 
   const getStatusNumber = (status: Project['status']) => {
@@ -142,12 +144,12 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
             {downloading ? (
               <>
                 <span className="w-2.5 h-2.5 rounded-full border-2 border-slate-400 border-t-transparent animate-spin mr-1" />
-                <span>Compiling...</span>
+                <span>{t('Compiling...')}</span>
               </>
             ) : (
               <>
                 <FileDown className="w-4 h-4 text-blue-600" />
-                <span>Download Report</span>
+                <span>{t('Download Report')}</span>
               </>
             )}
           </button>
@@ -159,7 +161,7 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
               className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-semibold text-white shadow-md shadow-blue-500/10"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>Submit for Approval</span>
+              <span>{t('Submit for Approval')}</span>
             </button>
           )}
         </div>
@@ -170,9 +172,9 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
         <div id="outstanding-docs-notice" className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3 shadow-sm animate-pulse">
           <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-xs font-black text-rose-800">Action Required: Document Verification Outstanding</h4>
+            <h4 className="text-xs font-black text-rose-800">{t('Action Required: Document Verification Outstanding')}</h4>
             <p className="text-[11px] text-slate-600 mt-1">
-              The municipal reviewing officer has requested supplementary documents to proceed with approval:
+              {t('The municipal reviewing officer has requested supplementary documents to proceed with approval:')}
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
               {project.documentsRequested.map((doc, idx) => (
@@ -194,7 +196,7 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
             activeTab === 'report' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          {getLabel('AI Compliance Report')}
+          {t(getLabel('AI Compliance Report'))}
         </button>
         <button
           id="tab-btn-form"
@@ -203,7 +205,7 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
             activeTab === 'form' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          Government Form Autofill
+          {t('Government Form Autofill')}
         </button>
         <button
           id="tab-btn-tracker"
@@ -212,7 +214,7 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
             activeTab === 'tracker' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          Permit Pipeline Tracker
+          {t('Permit Pipeline Tracker')}
         </button>
       </div>
 
@@ -232,26 +234,26 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
 
             {/* Extract Information summary cards */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">OCR Extracted Dimensions (Sarvam Document Intelligence)</span>
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block mb-4">{t('OCR Extracted Dimensions (Sarvam Document Intelligence)')}</span>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">Occupancy Profile</span>
+                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">{t('Occupancy Profile')}</span>
                   <span className="font-bold text-slate-800 block mt-1">{project.extractedData?.occupancyType || "Standard occupancy"}</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">Calculated FAR</span>
+                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">{t('Calculated FAR')}</span>
                   <span className="font-bold text-slate-800 block mt-1">{project.extractedData?.farValue || "1.2"} (Floor Area Ratio)</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">Parking Spaces</span>
+                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">{t('Parking Spaces')}</span>
                   <span className="font-bold text-slate-800 block mt-1">{project.extractedData?.parkingSpaces || "4"} bays provided</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">Front Setback Boundary</span>
+                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">{t('Front Setback Boundary')}</span>
                   <span className="font-bold text-slate-800 block mt-1">{project.extractedData?.setbackFront || "3.5"} meters</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 col-span-2">
-                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">Seismic & structural bearings</span>
+                  <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wide">{t('Seismic & structural bearings')}</span>
                   <span className="font-mono text-[11px] text-slate-600 block mt-1 truncate">{project.extractedData?.structuralNotes || "Frame specifications compliant."}</span>
                 </div>
               </div>
@@ -259,11 +261,11 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
 
             {/* Compliance Issues audit feed */}
             <div className="space-y-4">
-              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block">{getLabel('Violations')} & Audits ({issues.length} Rules Checked)</span>
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block">{t(getLabel('Violations'))} & Audits ({issues.length} Rules Checked)</span>
               
               {issues.length === 0 ? (
                 <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500">
-                  No issues detected. Ready for automatic filing!
+                  {t('No issues detected. Ready for automatic filing!')}
                 </div>
               ) : (
                 issues.map((issue) => (
@@ -280,11 +282,11 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
                       
                       <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-white/80 p-2 rounded border border-slate-200/50">
                         <div>
-                          <span className="text-slate-500 font-medium">Permitted:</span>
+                          <span className="text-slate-500 font-medium">{t('Permitted:')}</span>
                           <span className="text-slate-800 ml-1.5 font-bold">{issue.expected}</span>
                         </div>
                         <div>
-                          <span className="text-slate-500 font-medium">Calculated:</span>
+                          <span className="text-slate-500 font-medium">{t('Calculated:')}</span>
                           <span className="text-slate-800 ml-1.5 font-bold">{issue.actual}</span>
                         </div>
                       </div>
@@ -293,7 +295,7 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
                       
                       {issue.status !== 'Pass' && (
                         <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex gap-1 text-[11px] text-slate-500 leading-normal">
-                          <span className="font-bold font-mono text-blue-600 shrink-0">AI Suggestion:</span>
+                          <span className="font-bold font-mono text-blue-600 shrink-0">{t('AI Suggestion:')}</span>
                           <span>{issue.suggestion}</span>
                         </div>
                       )}
@@ -310,7 +312,7 @@ export default function ComplianceReportView({ project, onBack, onSubmitPermit, 
             
             {/* Compliance Score Radial Card */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm flex flex-col justify-between h-72">
-              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block">{getLabel('Compliance Score')}</span>
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider block">{t(getLabel('Compliance Score'))}</span>
               
               <div className="relative inline-flex items-center justify-center my-4">
                 <svg className="w-32 h-32 transform -rotate-90">

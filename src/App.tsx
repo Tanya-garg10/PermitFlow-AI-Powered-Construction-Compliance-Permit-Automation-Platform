@@ -14,6 +14,7 @@ import OfficerPanel from './components/OfficerPanel';
 import AdminPanel from './components/AdminPanel';
 import { User, Project, Regulation, AppNotification, UserRole } from './types';
 import { Shield, Sparkles, LogIn, Lock, Mail, UserPlus, CheckCircle2, MessageSquare, Landmark, HelpCircle, FileCheck, Info } from 'lucide-react';
+import { translateText } from './i18n';
 
 export default function App() {
   // Global States
@@ -101,6 +102,8 @@ export default function App() {
     setSelectedLang(lang);
   };
 
+  const t = (text: string) => translateText(text, selectedLang);
+
   const handleMarkNotificationRead = (id: string) => {
     setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, read: true } : n)
@@ -163,8 +166,8 @@ export default function App() {
       const newAlert: AppNotification = {
         id: "not-" + Date.now(),
         type: "alert",
-        title: "Compliance Checked",
-        message: `Blueprint OCR parse complete for ${projectSpecs.name}. Score: ${saveData.project.complianceScore}%`,
+        title: t('Compliance Checked'),
+        message: `${t('Blueprint OCR parse complete for')} ${projectSpecs.name}. ${t('Score')}: ${saveData.project.complianceScore}%`,
         timestamp: new Date().toLocaleTimeString(),
         read: false
       };
@@ -195,8 +198,8 @@ export default function App() {
       const newAlert: AppNotification = {
         id: "not-" + Date.now(),
         type: "sms",
-        title: "Filing Dispatched",
-        message: `Filing packet for ${data.project.name} sent to municipal review board.`,
+        title: t('Filing Dispatched'),
+        message: `${t('Filing packet for')} ${data.project.name} ${t('sent to municipal review board')}.`,
         timestamp: new Date().toLocaleTimeString(),
         read: false
       };
@@ -221,13 +224,13 @@ export default function App() {
       setActiveProject(null);
 
       // Send automated SMS / Email notification simulated
-      const alertTitle = updatedProject.status === 'Approved' ? 'Permit Approved!' :
-                         updatedProject.status === 'Rejected' ? 'Permit Filing Rejected' :
-                         'Documents Demanded';
+      const alertTitle = updatedProject.status === 'Approved' ? t('Permit Approved!') :
+                         updatedProject.status === 'Rejected' ? t('Permit Filing Rejected') :
+                         t('Documents Demanded');
       
-      const alertMsg = updatedProject.status === 'Approved' ? `Congratulations! Municipal clearance permit signed for ${updatedProject.name}.` :
-                       updatedProject.status === 'Rejected' ? `Municipal board rejected ${updatedProject.name}. Check violations notes.` :
-                       `Supplementary verification requested for ${updatedProject.name}: ${updatedProject.documentsRequested?.join(', ')}`;
+      const alertMsg = updatedProject.status === 'Approved' ? `${t('Congratulations! Municipal clearance permit signed for')} ${updatedProject.name}.` :
+                       updatedProject.status === 'Rejected' ? `${t('Municipal board rejected')} ${updatedProject.name}. ${t('Check violations notes')}.` :
+                       `${t('Supplementary verification requested for')} ${updatedProject.name}: ${updatedProject.documentsRequested?.join(', ')}`;
 
       const newAlert: AppNotification = {
         id: "not-" + Date.now(),
@@ -259,8 +262,8 @@ export default function App() {
       const newAlert: AppNotification = {
         id: "not-" + Date.now(),
         type: "alert",
-        title: "Standard Rules Added",
-        message: `New building code standard '${regSpecs.name}' added to regional catalog database.`,
+        title: t('Standard Rules Added'),
+        message: `${t('New building code standard')} '${regSpecs.name}' ${t('added to regional catalog database')}.`,
         timestamp: new Date().toLocaleTimeString(),
         read: false
       };
@@ -374,6 +377,7 @@ export default function App() {
         {/* LANDING PAGE ROUTE (Shown only if not logged in or explicitly clicked) */}
         {!currentUser ? (
           <LandingPage
+            selectedLang={selectedLang}
             onStartClick={() => {
               setAuthMode('login');
               setShowAuthModal(true);
@@ -399,6 +403,7 @@ export default function App() {
               {showWizard ? (
                 /* 1. NEW PROJECT CREATION FORM WIZARD */
                 <ProjectWizard
+                  selectedLang={selectedLang}
                   onBack={() => setShowWizard(false)}
                   onSubmit={handleCreateProjectSubmit}
                   isSubmitting={isSubmittingWizard}
@@ -417,11 +422,13 @@ export default function App() {
                   {currentRole === 'Municipal Officer' ? (
                     <OfficerPanel
                       projects={projects}
+                      selectedLang={selectedLang}
                       onUpdateProject={handleOfficerProjectUpdate}
                     />
                   ) : currentRole === 'Admin' ? (
                     <AdminPanel
                       regulations={regulations}
+                      selectedLang={selectedLang}
                       onAddRegulation={handleAdminAddRegulation}
                       onDeleteRegulation={handleAdminDeleteRegulation}
                     />
@@ -429,6 +436,7 @@ export default function App() {
                     // Default Contractor/Architect Portfolio dashboard
                     <DashboardCards
                       projects={projects}
+                      selectedLang={selectedLang}
                       onProjectClick={(p) => setActiveProject(p)}
                       onNewProjectClick={() => setShowWizard(true)}
                     />
