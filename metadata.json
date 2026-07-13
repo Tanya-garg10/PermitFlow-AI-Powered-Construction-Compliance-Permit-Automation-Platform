@@ -1,0 +1,6 @@
+{
+  "name": "PermitFlow – The Construction Compliance Autopilot",
+  "description": "AI-powered web application helping contractors, architects, builders, and developers simplify municipal permit approvals. Our AI checks regulations, detects compliance gaps, fills forms, and guides you to approval.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
