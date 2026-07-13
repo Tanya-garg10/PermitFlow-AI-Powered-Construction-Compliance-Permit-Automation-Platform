@@ -72,10 +72,6 @@ npm run lint    # run TypeScript checks
 - server.ts: Express server and mock API routes
 - vite.config.ts: Vite configuration
 
-## 📝 Notes
-
-This project includes a demo-style permit automation experience with sample project data and simulated municipal review flows for presentation and development purposes.
-
 ## 🚀 Future improvements
 
 The journey of PermitFlow is just beginning. Future upgrades may include deeper government regulation integration, real document upload workflows, smarter AI scoring, and a more complete end-to-end permit management experience.
