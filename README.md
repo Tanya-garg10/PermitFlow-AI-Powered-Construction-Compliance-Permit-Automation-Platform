@@ -74,6 +74,4 @@ npm run lint    # run TypeScript checks
 
 ## 🚀 Future improvements
 
-The journey of PermitFlow is just beginning. Future upgrades may include deeper government regulation integration, real document upload workflows, smarter AI scoring, and a more complete end-to-end permit management experience.
-
-Built with ❤️ by Tanya, Prerna, and Kritika.
+The journey of PermitFlow is just beginning. In the future, we aim to deepen government regulation integration, add real document upload workflows, improve AI scoring, and build a more complete end-to-end permit management experience. Built with ❤️ by Tanya, Prerna, and Kritika.
