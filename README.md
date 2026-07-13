@@ -1,20 +1,74 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# PermitFlow
 
-# Run and deploy your AI Studio app
+PermitFlow is an AI-powered construction compliance and permit automation platform for contractors, architects, and municipal officers. It helps users review blueprint data, evaluate zoning and safety compliance, simulate permit workflows, and collaborate with multilingual AI assistance.
 
-This contains everything you need to run your app locally.
+## What the app does
 
-View your app in AI Studio: https://ai.studio/apps/e79fad9e-e029-40d2-adda-c4bc8bf1aa44
+- AI-assisted blueprint analysis for construction projects
+- Real-time compliance checks for zoning, fire safety, structural, and environmental requirements
+- Permit workflow simulation with status tracking and approval/rejection scenarios
+- Multilingual support with an assistant experience for Indian construction and municipal workflows
 
-## Run Locally
+## Tech stack
 
-**Prerequisites:**  Node.js
+- React 19 + TypeScript
+- Vite for frontend development
+- Express server for API and app hosting
+- Tailwind CSS, lucide-react, and motion for UI
+- Google Gemini API via @google/genai
 
+## Quick start
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prerequisites
+
+- Node.js 18+ and npm
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment variables
+
+Create a local environment file from the example:
+
+```bash
+copy .env.example .env.local
+```
+
+Then update the values in [.env.local](.env.local):
+
+- GEMINI_API_KEY: required for Gemini-powered AI features
+- APP_URL: optional app URL for hosted environments
+- SARVAM_API_KEY: optional for translation and speech-related features
+
+> If GEMINI_API_KEY is not set, the app falls back to rule-based demo behavior.
+
+### 3. Run locally
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000 in your browser.
+
+## Available scripts
+
+```bash
+npm run dev     # start the development server
+npm run build   # build the app for production
+npm run start   # start the production build
+npm run lint    # run TypeScript checks
+```
+
+## Project structure
+
+- src/components: UI screens for landing, dashboard, wizard, officer/admin panels, and AI assistants
+- src/types.ts: shared TypeScript interfaces
+- server.ts: Express server and mock API routes
+- vite.config.ts: Vite configuration
+
+## Notes
+
+This project includes a demo-style permit automation experience with mock project data and simulated municipal review flows for presentation and development purposes.
