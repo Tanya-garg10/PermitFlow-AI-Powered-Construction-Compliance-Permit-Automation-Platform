@@ -1,23 +1,26 @@
-# PermitFlow
+# PermitFlow 🚧
 
-PermitFlow is an AI-powered construction compliance and permit automation platform for contractors, architects, and municipal officers. It helps users review blueprint data, evaluate zoning and safety compliance, simulate permit workflows, and collaborate with multilingual AI assistance.
+PermitFlow is an AI-powered construction compliance and permit automation platform designed for contractors, architects, and municipal officers. It helps users turn complex construction blueprints into clear compliance insights, faster permit decisions, and smoother approval workflows.
 
-## What the app does
+## 🌟 What this project does
 
-- AI-assisted blueprint analysis for construction projects
-- Real-time compliance checks for zoning, fire safety, structural, and environmental requirements
-- Permit workflow simulation with status tracking and approval/rejection scenarios
-- Multilingual support with an assistant experience for Indian construction and municipal workflows
+PermitFlow makes the permit process easier by combining AI with a simple dashboard experience:
 
-## Tech stack
+- 🏗️ AI-assisted blueprint analysis for construction projects
+- ✅ Real-time compliance checks for zoning, fire safety, structural, and environmental requirements
+- 📋 Permit workflow simulation with status tracking and approval/rejection scenarios
+- 🗣️ Multilingual support for Indian construction and municipal use cases
+- 🤖 Smart assistant experience that helps users understand next steps quickly
+
+## 🧰 Tech stack
 
 - React 19 + TypeScript
-- Vite for frontend development
+- Vite for fast frontend development
 - Express server for API and app hosting
-- Tailwind CSS, lucide-react, and motion for UI
+- Tailwind CSS, lucide-react, and motion for modern UI experience
 - Google Gemini API via @google/genai
 
-## Quick start
+## ▶️ Quick start
 
 ### Prerequisites
 
@@ -29,7 +32,7 @@ PermitFlow is an AI-powered construction compliance and permit automation platfo
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Set up environment variables
 
 Create a local environment file from the example:
 
@@ -43,9 +46,9 @@ Then update the values in [.env.local](.env.local):
 - APP_URL: optional app URL for hosted environments
 - SARVAM_API_KEY: optional for translation and speech-related features
 
-> If GEMINI_API_KEY is not set, the app falls back to rule-based demo behavior.
+> If GEMINI_API_KEY is not set, the app will still run in a rule-based demo mode.
 
-### 3. Run locally
+### 3. Run the app locally
 
 ```bash
 npm run dev
@@ -53,7 +56,7 @@ npm run dev
 
 Open http://localhost:3000 in your browser.
 
-## Available scripts
+## ⚙️ Available scripts
 
 ```bash
 npm run dev     # start the development server
@@ -62,13 +65,13 @@ npm run start   # start the production build
 npm run lint    # run TypeScript checks
 ```
 
-## Project structure
+## 📁 Project structure
 
-- src/components: UI screens for landing, dashboard, wizard, officer/admin panels, and AI assistants
+- src/components: landing page, dashboard, project wizard, officer/admin panels, and AI assistant views
 - src/types.ts: shared TypeScript interfaces
 - server.ts: Express server and mock API routes
 - vite.config.ts: Vite configuration
 
-## Notes
+## 📝 Notes
 
-This project includes a demo-style permit automation experience with mock project data and simulated municipal review flows for presentation and development purposes.
+This project includes a demo-style permit automation experience with sample project data and simulated municipal review flows for presentation and development purposes.
